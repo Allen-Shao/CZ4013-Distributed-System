@@ -12,6 +12,12 @@ public class Serializer {
         bufferLength = 0;
     }
 
+    public void writeChar(char c) {
+        extendBuffer(1);
+        buffer[bufferLength] = (byte) c;
+        bufferLength += 1;
+    }
+
     public void writeInt(int input) {
         extendBuffer(4);
         buffer[bufferLength] = (byte) (input >> 24);

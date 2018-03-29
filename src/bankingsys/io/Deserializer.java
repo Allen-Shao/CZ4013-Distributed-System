@@ -12,6 +12,11 @@ public class Deserializer {
         bufferPosition = 0;
     }
 
+    public char readChar() {
+        char c = (char) buffer[bufferPosition];
+        return c;
+    }
+
     public int readInt() {
         int val = (buffer[bufferPosition] << 24) & 0xFF000000 |
                 (buffer[bufferPosition + 1] << 16) & 0x00FF0000 |
