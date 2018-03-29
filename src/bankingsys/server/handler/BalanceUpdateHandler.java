@@ -6,7 +6,7 @@ import bankingsys.message.ServiceResponse;
 /**
  * Created by koallen on 29/3/18.
  */
-public class TransferHandler implements ServiceHandler {
+public class BalanceUpdateHandler implements ServiceHandler {
     @Override
     public ServiceResponse handleRequest(ServiceRequest request) {
         return null;

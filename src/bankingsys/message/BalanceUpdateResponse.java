@@ -7,7 +7,7 @@ import bankingsys.io.Serializer;
 /**
  * Created by koallen on 29/3/18.
  */
-public class BalanceCheckRequest extends ServiceRequest implements Serializable {
+public class BalanceUpdateResponse extends ServiceResponse implements Serializable {
     @Override
     public void write(Serializer serializer) {
 
