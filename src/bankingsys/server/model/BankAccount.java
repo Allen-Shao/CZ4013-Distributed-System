@@ -52,4 +52,8 @@ public class BankAccount {
     public void setBalance(float balance) {
         this.balance = balance;
     }
+
+    public void modifyBalance(float difference) {
+        this.balance += difference;
+    }
 }
