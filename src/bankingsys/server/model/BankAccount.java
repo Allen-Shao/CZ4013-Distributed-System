@@ -17,6 +17,10 @@ public class BankAccount {
         this.balance = balance;
     }
 
+    public enum Currency {
+        SGD, USD, CNY, JPY, HKD
+    }
+
     public int getAccountNumer() {
         return accountNumer;
     }
