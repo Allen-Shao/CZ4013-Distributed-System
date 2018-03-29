@@ -8,6 +8,13 @@ import bankingsys.io.Serializer;
  * Created by koallen on 29/3/18.
  */
 public class ServiceRequest implements Serializable {
+
+    private Character requestType;
+
+    public Character getRequestType(){
+        return this.requestType;
+    }
+
     @Override
     public void write(Serializer serializer) {
 
