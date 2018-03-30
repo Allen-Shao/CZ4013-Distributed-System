@@ -23,13 +23,14 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 public class AccountMonitoringHandler extends ServiceHandler {
     private MonitoringClients clients;
 
-    public AccountMonitoringHandler(HashMap<Integer, BankAccount> accounts, RequestReceiver server, MonitoringClients clients) {
+    public AccountMonitoringHandler(HashMap<Integer, BankAccount> accounts,
+                                    RequestReceiver server, MonitoringClients clients) {
         super(accounts, server);
         this.clients = clients;
     }
 
     @Override
-    public void handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
         System.out.println("AccountMonitoringHandler called");
         Client client = new Client(request.getRequestAddress(), request.getRequestPort());
@@ -42,15 +43,15 @@ public class AccountMonitoringHandler extends ServiceHandler {
                     clients.removeFromClients(client);
                     ServiceResponse terminateResponse = new ServiceResponse(END_MONITER,
                             SUCCESS, null, "Monitoring terminated", null);
-                    server.sendResponse(terminateResponse, request.getRequestAddress(), request.getRequestPort());
+                    server.sendResponse(terminateResponse, request.getRequestAddress(), request.getRequestPort(), simulation);
                     System.out.println("Client removed");
                 }
             }, request.getRequestDelay() * 1000);
             response = new ServiceResponse(ACCOUNT_MONITER, SUCCESS, null, "Monitoring callback registered", null);
-            server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+            server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
             return;
         }
         response = new ServiceResponse(ACCOUNT_MONITER, FAILURE, null, "Monitoring callback already registered", null);
-        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
     }
 }

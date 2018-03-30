@@ -13,6 +13,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -135,6 +136,8 @@ public class RequestReceiver {
         try {
             if (simulation){
                 //TODO: failure
+                Random random = new Random();
+                random.nextInt();
             }
             socket.send(responsePacket);
         } catch (IOException e) {

@@ -22,7 +22,7 @@ public class AccountCreationHandler extends ServiceHandler {
 
 
     @Override
-    public void handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
         BankAccount newAccount = new BankAccount(currentId, request.getRequestName(),
                 request.getRequestPassword(), request.getRequestCurrency(), request.getRequestAmount());
@@ -32,7 +32,7 @@ public class AccountCreationHandler extends ServiceHandler {
                 "Account No." + Integer.toString(newAccount.getAccountNumber()) + " belonging to " + newAccount.getName() +
                         " has been created with initial balance $" + Float.toString(newAccount.getBalance()),
                 newAccount.getBalance());
-        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
         server.sendCallbacks(response);
     }
 }
