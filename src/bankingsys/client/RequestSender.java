@@ -28,14 +28,19 @@ import static bankingsys.Constant.PASSWORD_LENGTH;
  */
 
 public class RequestSender {
+    private DatagramSocket socket = null;
+    private byte[] buffer = new byte[BUFFER_SIZE];
+    private Integer requestID = 0;
 
     public static void main(String args[]) throws IOException {
-        DatagramSocket socket = null;
-        byte[] buffer = new byte[BUFFER_SIZE];
+        new RequestSender().run();
+    }
+
+    public void run() {
         try {
             socket = new DatagramSocket();
+            socket.setSoTimeout(200);
             Scanner sc = new Scanner(System.in);
-            Integer requestID = 0;
             while (true) {
                 System.out.print(">>> ");
                 String command = sc.nextLine();
@@ -154,7 +159,7 @@ public class RequestSender {
                     System.out.println(response.getResponseMessage());
 
                     if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
-                        startMonitoring(socket, buffer);
+                        startMonitoring();
                     }
                 } else {
                     System.out.println("Command parse error.");
@@ -171,7 +176,7 @@ public class RequestSender {
         }
     }
 
-    private static void startMonitoring(DatagramSocket socket, byte[] buffer) {
+    private void startMonitoring() {
         try {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);
