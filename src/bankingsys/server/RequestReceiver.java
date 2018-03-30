@@ -11,14 +11,13 @@ import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.Random;
 
+import static bankingsys.Constant.BUFFER_SIZE;
+import static bankingsys.Constant.SERVER_PORT;
+
 /**
- * Created by koallen on 29/3/18.
+ * Main class that implements the server
  */
 public class RequestReceiver {
-
-    public static final int SERVER_PORT = 6789;
-    private static final int BUFFER_SIZE = 1024;
-    private static final int MONITOR_CLIENT_PORT = 8888;
 
     public static void main(String[] args) {
         // Default use at-least-once invocation semantic
@@ -52,20 +51,17 @@ public class RequestReceiver {
 
 
         DatagramSocket socket = null;
+        Deserializer deserializer = null;
+        Serializer serializer = null;
         try {
-
-            socket = new DatagramSocket(SERVER_PORT);
-            Deserializer deserializer;
-            Serializer serializer;
-
-            //a buffer for receive
             byte[] receiveBuffer = new byte[BUFFER_SIZE];
+            socket = new DatagramSocket(SERVER_PORT);
+
             System.out.println("Start listening");
             while (true) {
                 DatagramPacket requestPacket =
                         new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(requestPacket);
-                System.out.println(new String(receiveBuffer));
                 deserializer = new Deserializer(receiveBuffer);
                 ServiceRequest serviceRequest = new ServiceRequest();
                 serviceRequest.read(deserializer);

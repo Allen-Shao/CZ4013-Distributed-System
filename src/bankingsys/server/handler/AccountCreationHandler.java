@@ -17,6 +17,6 @@ public class AccountCreationHandler extends ServiceHandler {
     @Override
     public ServiceResponse handleRequest(ServiceRequest request) {
         System.out.println("Called creation handler");
-        return new ServiceResponse(100);
+        return new ServiceResponse(200, 101, null, request.getRequestAmount());
     }
 }
