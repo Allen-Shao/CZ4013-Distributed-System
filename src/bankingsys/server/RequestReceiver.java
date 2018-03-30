@@ -11,6 +11,7 @@ import bankingsys.server.model.MonitoringClients;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.HashMap;
 
 import static bankingsys.Constant.BUFFER_SIZE;
@@ -47,7 +48,6 @@ public class RequestReceiver {
         handlerMap.put('e', new BalanceUpdateHandler(accountDatabase));
         handlerMap.put('f', new TransferHandler(accountDatabase));
 
-        HashMap<Integer, ServiceResponse> clientHistory = new HashMap<>();
         HashMap<Client, HashMap<Integer, ServiceResponse>> clientsLog = new HashMap<>();
 
         DatagramSocket socket = null;
@@ -63,32 +63,27 @@ public class RequestReceiver {
                 DatagramPacket requestPacket =
                         new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(requestPacket);
-
-                // Check client in log. If not exist, register and log a new client
-                Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
-                if (CheckClient(tempClient, clientsLog)) {
-                    if (CheckRequestHistory(clientsLog.get(tempClient), 0)) {
-
-                    }
-                }
+                serializer = new Serializer();
 
                 deserializer = new Deserializer(receiveBuffer);
                 ServiceRequest serviceRequest = new ServiceRequest();
                 serviceRequest.read(deserializer);
-                serviceRequest.setRequestAddress(requestPacket.getAddress());
-                serviceRequest.setRequestPort(requestPacket.getPort());
-
-                // handle the request
                 Character op = serviceRequest.getRequestType();
-                ServiceResponse response =  handlerMap.get(op).handleRequest(serviceRequest);
+                ServiceResponse response;
+                // Check client in log. If not exist, register and log a new client
+                Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
+                Boolean registered = checkClient(tempClient, clientsLog);
 
-                // send response
-                serializer = new Serializer();
-                response.write(serializer);
-                DatagramPacket responsePacket =
-                        new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
-                                requestPacket.getAddress(), requestPacket.getPort());
-                socket.send(responsePacket);
+                if (registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
+                    response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
+                } else {
+                    serviceRequest.setRequestAddress(requestPacket.getAddress());
+                    serviceRequest.setRequestPort(requestPacket.getPort());
+                    // handle the request
+                    response = handlerMap.get(op).handleRequest(serviceRequest);
+                }
+
+                sendResponse(serializer, response, requestPacket.getAddress(), requestPacket.getPort(), socket);
 
                 // send callbacks
                 if (op != 'c')
@@ -103,7 +98,21 @@ public class RequestReceiver {
         }
     }
 
-    private static Boolean CheckRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
+    private static void sendResponse(Serializer serializer, ServiceResponse response,
+                                     InetAddress address, int port, DatagramSocket socket) {
+        // send response
+        response.write(serializer);
+        DatagramPacket responsePacket =
+                new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
+                        address, port);
+        try {
+            socket.send(responsePacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Boolean checkRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
         if (history.containsKey(id)) {
             System.out.println("Request already handled.");
             return true;
@@ -113,7 +122,7 @@ public class RequestReceiver {
         }
     }
 
-    private static Boolean CheckClient(Client client, HashMap<Client, HashMap<Integer, ServiceResponse>> log) {
+    private static Boolean checkClient(Client client, HashMap<Client, HashMap<Integer, ServiceResponse>> log) {
         if (log.containsKey(client)) {
             System.out.println("Client exists.");
             return true;
