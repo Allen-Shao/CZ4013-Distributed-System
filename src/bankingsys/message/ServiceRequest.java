@@ -94,6 +94,7 @@ public class ServiceRequest implements Serializable {
     @Override
     public void write(Serializer serializer) {
         serializer.writeChar(requestType);
+        serializer.writeInt(requestID);
         switch (requestType) {
             case 'a':
             case 'd':
@@ -129,6 +130,7 @@ public class ServiceRequest implements Serializable {
     @Override
     public void read(Deserializer deserializer) {
         requestType = deserializer.readChar();
+        requestID = deserializer.readInt();
         switch (requestType) {
             case 'a':
             case 'd':
