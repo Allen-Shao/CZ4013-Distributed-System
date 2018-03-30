@@ -27,15 +27,20 @@ public class TransferHandler extends ServiceHandler {
             BankAccount sourceAccount = accounts.get(request.getRequestAccount());
             BankAccount targetAccount = accounts.get(request.getRequestTargetAccount());
             if (sourceAccount.getCurrencyType() == targetAccount.getCurrencyType()) {
-                sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
-                targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAmount());
-                response = new ServiceResponse('f', SUCCESS, sourceAccount.getAccountNumber(),
-                        "Transfered $" + Float.toString(request.getRequestAmount()) +
-                                " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
-                                " to account no." + Integer.toString(targetAccount.getAccountNumber()),
-                        sourceAccount.getBalance());
-                server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
-                server.sendCallbacks(response);
+                if (sourceAccount.getBalance() >= request.getRequestAccount()) {
+                    sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
+                    targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAmount());
+                    response = new ServiceResponse('f', SUCCESS, sourceAccount.getAccountNumber(),
+                            "Transferred $" + Float.toString(request.getRequestAmount()) +
+                                    " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
+                                    " to account no." + Integer.toString(targetAccount.getAccountNumber()),
+                            sourceAccount.getBalance());
+                    server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+                    server.sendCallbacks(response);
+                } else {response = new ServiceResponse('f', FAILURE, null, "No enough balance.", null);
+                    server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+                }
+
             } else {
                 response = new ServiceResponse('f', FAILURE, null, "Target account currency type does not match.", null);
                 server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
