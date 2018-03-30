@@ -37,10 +37,11 @@ public class AccountMonitoringHandler extends ServiceHandler {
                 public void run() {
                     clients.removeFromClients(client);
                     // TODO: send message back to client
+                    System.out.println("Client removed");
                 }
             }, request.getRequestDelay() * 1000);
-            return new ServiceResponse(SUCCESS, 0, "Monitoring callback registered", 0.0f);
+            return new ServiceResponse('c', SUCCESS, 0, "Monitoring callback registered", 0.0f);
         }
-        return new ServiceResponse(FAILURE, null, "Monitoring callback already registered", null);
+        return new ServiceResponse('c', FAILURE, null, "Monitoring callback already registered", null);
     }
 }

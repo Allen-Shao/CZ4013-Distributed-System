@@ -49,7 +49,7 @@ public class RequestReceiver {
         Boolean atMostOnce = false;
 
         options.addOption("h", "help", false, "Show help.");
-        options.addOption("mode", "var", true, "Set mode to 'at-least-once' or 'at-most-once'.");
+        options.addOption("m", "mode", true, "Set mode to 'at-least-once' or 'at-most-once'.");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -74,6 +74,8 @@ public class RequestReceiver {
             log.log(Level.SEVERE, "Failed to parse command line properties", e);
             help();
         }
+
+        System.out.println(atMostOnce);
 
         HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
         int databaseSize = accountDatabase.size();

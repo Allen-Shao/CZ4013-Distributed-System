@@ -22,12 +22,12 @@ public class BalanceCheckHandler extends ServiceHandler {
         if (authenticate(request)) {
             if (accounts.containsKey(request.getRequestAccount())) {
                 BankAccount account = accounts.get(request.getRequestAccount());
-                return new ServiceResponse(SUCCESS, account.getAccountNumber(),
+                return new ServiceResponse('d', SUCCESS, account.getAccountNumber(),
                         "Account No." + Integer.toString(account.getAccountNumber()) + " belonging to " + account.getName() +
                         " has a balance of $" + Float.toString(account.getBalance()),
                         account.getBalance());
             }
         }
-        return new ServiceResponse(FAILURE, null, "Account doesn't exist", null);
+        return new ServiceResponse('d', FAILURE, null, "Account doesn't exist", null);
     }
 }

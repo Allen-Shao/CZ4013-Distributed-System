@@ -24,7 +24,9 @@ public class ServiceResponse implements Serializable {
 
     public ServiceResponse() {}
 
-    public ServiceResponse(ResponseStatus responseCode, Integer responseAccount, String responseMessage, Float responseAmount) {
+    public ServiceResponse(Character responseType, ResponseStatus responseCode,
+                           Integer responseAccount, String responseMessage, Float responseAmount) {
+        this.responseType = responseType;
         this.responseCode = responseCode;
         this.responseAccount = responseAccount;
         this.responseMessage = responseMessage;

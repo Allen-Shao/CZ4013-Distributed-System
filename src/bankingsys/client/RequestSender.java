@@ -57,7 +57,8 @@ public class RequestSender {
                                 commandSplits[2],
                                 Float.parseFloat(commandSplits[4]),
                                 null,
-                                BankAccount.Currency.valueOf(commandSplits[3]));
+                                BankAccount.Currency.valueOf(commandSplits[3]),
+                                null);
                         break;
                     case "close":
                         request = new ServiceRequest(
@@ -66,6 +67,7 @@ public class RequestSender {
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
+                                null,
                                 null,
                                 null,
                                 null);
@@ -79,7 +81,8 @@ public class RequestSender {
                                 commandSplits[3],
                                 -Float.parseFloat(commandSplits[5]),
                                 null,
-                                BankAccount.Currency.valueOf(commandSplits[4]));
+                                BankAccount.Currency.valueOf(commandSplits[4]),
+                                null);
                         break;
                     case "withdraw":
                         request = new ServiceRequest(
@@ -90,7 +93,8 @@ public class RequestSender {
                                 commandSplits[3],
                                 Float.parseFloat(commandSplits[5]),
                                 null,
-                                BankAccount.Currency.valueOf(commandSplits[4]));
+                                BankAccount.Currency.valueOf(commandSplits[4]),
+                                null);
                         break;
                     case "monitor":
                         request = new ServiceRequest(
@@ -101,7 +105,8 @@ public class RequestSender {
                                 null,
                                 null,
                                 null,
-                                null);
+                                null,
+                                Integer.parseInt(commandSplits[1]));
                         break;
                     case "Check":
                         request = new ServiceRequest(
@@ -110,6 +115,7 @@ public class RequestSender {
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
+                                null,
                                 null,
                                 null,
                                 null);
@@ -123,6 +129,7 @@ public class RequestSender {
                                 commandSplits[3],
                                 Float.parseFloat(commandSplits[5]),
                                 Integer.parseInt(commandSplits[4]),
+                                null,
                                 null);
                         break;
                     case "exit":

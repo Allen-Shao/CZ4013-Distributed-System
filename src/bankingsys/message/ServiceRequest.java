@@ -115,6 +115,7 @@ public class ServiceRequest implements Serializable {
                 serializer.writeInt(requestCurrency.ordinal());
                 break;
             case 'c':
+                serializer.writeInt(requestDelay);
                 break;
             case 'e':
                 serializer.writeString(requestName);
@@ -151,6 +152,7 @@ public class ServiceRequest implements Serializable {
                 requestCurrency = Currency.values()[deserializer.readInt()];
                 break;
             case 'c':
+                requestDelay = deserializer.readInt();
                 break;
             case 'e':
                 requestName = deserializer.readString();

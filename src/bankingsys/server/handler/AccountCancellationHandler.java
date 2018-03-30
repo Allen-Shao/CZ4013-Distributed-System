@@ -21,8 +21,8 @@ public class AccountCancellationHandler extends ServiceHandler {
     public ServiceResponse handleRequest(ServiceRequest request) {
         if (accounts.containsKey(request.getRequestAccount())) {
             accounts.remove(request.getRequestAccount());
-            return new ServiceResponse(SUCCESS, null, "Account closed", null);
+            return new ServiceResponse('a', SUCCESS, null, "Account closed", null);
         }
-        return new ServiceResponse(FAILURE, null, "Account doesn't exist", null);
+        return new ServiceResponse('a', FAILURE, null, "Account doesn't exist", null);
     }
 }
