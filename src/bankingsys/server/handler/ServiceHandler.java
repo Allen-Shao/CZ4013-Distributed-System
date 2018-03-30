@@ -2,10 +2,18 @@ package bankingsys.server.handler;
 
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.server.model.BankAccount;
+
+import java.util.HashMap;
 
 /**
- * Created by koallen on 29/3/18.
+ * Abstract class to be inherited by all concrete service handlers
  */
-public interface ServiceHandler {
-    ServiceResponse handleRequest(ServiceRequest request);
+public abstract class ServiceHandler {
+    protected HashMap<Integer, BankAccount> accounts;
+
+    public ServiceHandler(HashMap<Integer, BankAccount> accounts) {
+        this.accounts = accounts;
+    }
+    public abstract ServiceResponse handleRequest(ServiceRequest request);
 }
