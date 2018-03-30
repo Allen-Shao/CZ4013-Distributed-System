@@ -33,6 +33,7 @@ public class Deserializer {
 
     public String readString() {
         int stringLength = readInt();
+        System.out.println(stringLength);
         byte[] stringBuffer = new byte[stringLength];
         System.arraycopy(buffer, bufferPosition, stringBuffer, 0, stringLength);
         String str = new String(stringBuffer);

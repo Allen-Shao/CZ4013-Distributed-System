@@ -14,7 +14,7 @@ public class Serializer {
 
     public void writeChar(char c) {
         extendBuffer(1);
-        buffer[bufferLength] = (byte) c;
+        buffer[bufferLength] = (byte) (c & 0xFF);
         bufferLength += 1;
     }
 

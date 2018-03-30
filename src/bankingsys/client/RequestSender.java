@@ -1,8 +1,12 @@
 package bankingsys.client;
 
+import bankingsys.io.Serializer;
 import bankingsys.message.ServiceRequest;
+import bankingsys.server.RequestReceiver;
 import bankingsys.server.model.BankAccount;
 
+import java.io.IOException;
+import java.net.*;
 import java.util.Scanner;
 
 /**
@@ -11,7 +15,9 @@ import java.util.Scanner;
 
 public class RequestSender {
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws IOException {
+        byte[] buffer = new byte[1024];
+        DatagramSocket socket = new DatagramSocket();
         Scanner sc = new Scanner(System.in);
         while (true) {
             System.out.print(">>> ");
@@ -30,7 +36,7 @@ public class RequestSender {
             String commandType = commandSplits[0];
             System.out.println(commandType);
 
-            ServiceRequest request;
+            ServiceRequest request = null;
             switch (commandType){
                 case "Create":
                     request = new ServiceRequest(
@@ -40,7 +46,8 @@ public class RequestSender {
                             commandSplits[2],
                             Float.parseFloat(commandSplits[4]),
                             null,
-                            BankAccount.Currency.valueOf(commandSplits[3]));
+                            BankAccount.Currency.CNY);
+                            //BankAccount.Currency.valueOf(commandSplits[3]));
                     break;
                 case "Close":
                     request = new ServiceRequest(
@@ -96,9 +103,18 @@ public class RequestSender {
                     break;
             }
 
-
+            if (request != null) {
+                Serializer serializer = new Serializer();
+                request.write(serializer);
+                InetAddress address = InetAddress.getByName("localhost");
+                DatagramPacket packet = new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
+                        address, RequestReceiver.SERVER_PORT);
+                System.out.println(new String(serializer.getBuffer()));
+                socket.send(packet);
+                DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+                socket.receive(reply);
+                System.out.println(new String(buffer));
+            }
         }
-
-
     }
 }

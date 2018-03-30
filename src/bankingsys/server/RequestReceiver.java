@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public class RequestReceiver {
 
-    private static final int SERVER_PORT = 6789;
+    public static final int SERVER_PORT = 6789;
     private static final int BUFFER_SIZE = 1024;
     private static final int MONITOR_CLIENT_PORT = 8888;
 
@@ -60,10 +60,12 @@ public class RequestReceiver {
 
             //a buffer for receive
             byte[] receiveBuffer = new byte[BUFFER_SIZE];
+            System.out.println("Start listening");
             while (true) {
                 DatagramPacket requestPacket =
                         new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(requestPacket);
+                System.out.println(new String(receiveBuffer));
                 deserializer = new Deserializer(receiveBuffer);
                 ServiceRequest serviceRequest = new ServiceRequest();
                 serviceRequest.read(deserializer);
