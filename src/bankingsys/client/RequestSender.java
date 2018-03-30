@@ -45,7 +45,7 @@ public class RequestSender {
 
                 ServiceRequest request = null;
                 switch (commandType) {
-                    case "Create":
+                    case "create":
                         request = new ServiceRequest(
                                 'b',
                                 commandSplits[1],
@@ -55,7 +55,7 @@ public class RequestSender {
                                 null,
                                 BankAccount.Currency.valueOf(commandSplits[3]));
                         break;
-                    case "Close":
+                    case "close":
                         request = new ServiceRequest(
                                 'a',
                                 commandSplits[1],
@@ -65,7 +65,7 @@ public class RequestSender {
                                 null,
                                 null);
                         break;
-                    case "Deposit":
+                    case "deposit":
                         request = new ServiceRequest(
                                 'e',
                                 commandSplits[1],
@@ -75,7 +75,7 @@ public class RequestSender {
                                 null,
                                 BankAccount.Currency.valueOf(commandSplits[4]));
                         break;
-                    case "Withdraw":
+                    case "withdraw":
                         request = new ServiceRequest(
                                 'e',
                                 commandSplits[1],
@@ -85,7 +85,7 @@ public class RequestSender {
                                 null,
                                 BankAccount.Currency.valueOf(commandSplits[4]));
                         break;
-                    case "Monitor":
+                    case "monitor":
                         request = new ServiceRequest(
                                 'c',
                                 null,
@@ -105,7 +105,7 @@ public class RequestSender {
                                 null,
                                 null);
                         break;
-                    case "Transfer":
+                    case "transfer":
                         request = new ServiceRequest(
                                 'f',
                                 commandSplits[1],
@@ -115,6 +115,8 @@ public class RequestSender {
                                 Integer.parseInt(commandSplits[4]),
                                 null);
                         break;
+                    case "exit":
+                        return;
                 }
 
                 if (request != null) {
@@ -136,6 +138,8 @@ public class RequestSender {
                     if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
                         startMonitoring();
                     }
+                } else {
+                    System.out.println("Command parse error.");
                 }
             }
         } catch (Exception e) {
