@@ -4,14 +4,14 @@ package bankingsys.server.model;
  * Created by koallen on 29/3/18.
  */
 public class BankAccount {
-    private int accountNumer;
+    private int accountNumber;
     private String name;
     private String password;
 
     private float balance;
 
     public BankAccount(int accountNumer, String name, String password, float balance) {
-        this.accountNumer = accountNumer;
+        this.accountNumber = accountNumer;
         this.name = name;
         this.password = password;
         this.balance = balance;
@@ -22,11 +22,11 @@ public class BankAccount {
     }
 
     public int getAccountNumer() {
-        return accountNumer;
+        return accountNumber;
     }
 
-    public void setAccountNumer(int accountNumer) {
-        this.accountNumer = accountNumer;
+    public void setAccountNumer(int accountNumber) {
+        this.accountNumber = accountNumber;
     }
 
     public String getName() {
