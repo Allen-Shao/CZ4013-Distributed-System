@@ -75,7 +75,7 @@ public class RequestReceiver {
         new RequestReceiver().run(atMostOnce);
     }
 
-    public void run(boolean atMostOnce) {
+    private void run(boolean atMostOnce) {
         HashMap<Character, ServiceHandler> handlerMap = new HashMap<>();
         handlerMap.put('a', new AccountCancellationHandler(accountDatabase, this));
         handlerMap.put('b', new AccountCreationHandler(accountDatabase, this));

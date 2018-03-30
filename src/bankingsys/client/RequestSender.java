@@ -36,7 +36,7 @@ public class RequestSender {
         new RequestSender().run();
     }
 
-    public void run() {
+    private void run() {
         try {
             socket = new DatagramSocket();
             socket.setSoTimeout(200);
