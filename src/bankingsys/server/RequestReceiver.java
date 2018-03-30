@@ -4,10 +4,12 @@ import bankingsys.io.Serializer;
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
 import bankingsys.server.handler.*;
+import bankingsys.server.model.BankAccount;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Created by koallen on 29/3/18.
@@ -21,15 +23,24 @@ public class RequestReceiver {
     public static void main(String[] args) {
         // Default use at-least-once invocation semantic
         // If the first argument is "1", use at-most-once invocation semantic
-        boolean atMostOnce = args.length > 0 && args[0].equals("1");
-        System.out.println("at most once: " + atMostOnce);
+        // boolean atMostOnce = args.length > 0 && args[0].equals("1");
+        // System.out.println("at most once: " + atMostOnce);
 
         // Second argument indicates the mode of datagram socket.
         // "1": reply packets from server will lost for 3 times
         // "2": request packets from client will lost for 3 times
         // "": normal datagramsocket.
-        String unstable = args.length > 1 ? args[1] : "";
-        System.out.println("unstable datagram: " + unstable);
+        // String unstable = args.length > 1 ? args[1] : "";
+        // System.out.println("unstable datagram: " + unstable);
+
+
+        HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
+        accountDatabase.put(0, randomAccount(0));
+        accountDatabase.put(1, randomAccount(1));
+        accountDatabase.put(2, randomAccount(2));
+        accountDatabase.put(3, randomAccount(3));
+
+        int databaseSize = accountDatabase.size();
 
         HashMap <Character, ServiceHandler> handlerMap = new HashMap<Character, ServiceHandler>();
         handlerMap.put('a', new AccountCancellationHandler());
@@ -38,6 +49,7 @@ public class RequestReceiver {
         handlerMap.put('d', new BalanceCheckHandler());
         handlerMap.put('e', new BalanceUpdateHandler());
         handlerMap.put('f', new TransferHandler());
+
 
         DatagramSocket socket = null;
         try {
@@ -72,5 +84,20 @@ public class RequestReceiver {
                 socket.close();
             }
         }
+    }
+
+    private static BankAccount randomAccount(int accountNumber){
+        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        Random random=new Random();
+        StringBuffer sb=new StringBuffer();
+        for(int i=0;i<(5+(int)random.nextInt(5));i++){
+            int number=random.nextInt(52);
+            sb.append(str.charAt(number));
+        }
+        String name = sb.toString();
+        String password = "123456";
+        BankAccount.Currency currency = BankAccount.Currency.SGD;
+        float balance = (float) 0.0;
+        return new BankAccount(accountNumber, name, password, currency, balance);
     }
 }

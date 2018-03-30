@@ -4,16 +4,17 @@ package bankingsys.server.model;
  * Created by koallen on 29/3/18.
  */
 public class BankAccount {
-    private int accountNumer;
+    private int accountNumber;
     private String name;
     private String password;
-
+    private Currency currencyType;
     private float balance;
 
-    public BankAccount(int accountNumer, String name, String password, float balance) {
-        this.accountNumer = accountNumer;
+    public BankAccount(int accountNumber, String name, String password, Currency currencyType, float balance) {
+        this.accountNumber = accountNumber;
         this.name = name;
         this.password = password;
+        this.currencyType = currencyType;
         this.balance = balance;
     }
 
@@ -21,12 +22,12 @@ public class BankAccount {
         SGD, USD, CNY, JPY, HKD
     }
 
-    public int getAccountNumer() {
-        return accountNumer;
+    public int getAccountNumber() {
+        return accountNumber;
     }
 
-    public void setAccountNumer(int accountNumer) {
-        this.accountNumer = accountNumer;
+    public void setAccountNumber(int accountNumber) {
+        this.accountNumber = accountNumber;
     }
 
     public String getName() {
@@ -43,6 +44,14 @@ public class BankAccount {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Currency getCurrencyType() {
+        return currencyType;
+    }
+
+    public void setCurrencyType(Currency currencyType) {
+        this.currencyType = currencyType;
     }
 
     public float getBalance() {
