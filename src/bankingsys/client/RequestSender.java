@@ -113,7 +113,7 @@ public class RequestSender {
                                 null,
                                 Integer.parseInt(commandSplits[1]));
                         break;
-                    case "Check":
+                    case "check":
                         request = new ServiceRequest(
                                 requestID,
                                 'd',
