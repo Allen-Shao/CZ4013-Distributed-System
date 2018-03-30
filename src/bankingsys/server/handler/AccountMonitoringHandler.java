@@ -38,7 +38,7 @@ public class AccountMonitoringHandler extends ServiceHandler {
                 @Override
                 public void run() {
                     clients.removeFromClients(client);
-                    ServiceResponse terminateResponse = new ServiceResponse('k',
+                    ServiceResponse terminateResponse = new ServiceResponse('g',
                             SUCCESS, null, "Monitoring terminated", null);
                     server.sendResponse(terminateResponse, request.getRequestAddress(), request.getRequestPort());
                     System.out.println("Client removed");

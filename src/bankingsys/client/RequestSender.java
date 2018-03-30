@@ -9,13 +9,13 @@ import bankingsys.server.model.BankAccount;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static bankingsys.Constant.BUFFER_SIZE;
-import static bankingsys.Constant.SERVER_PORT;
+import static bankingsys.Constant.*;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
-import static bankingsys.Constant.PASSWORD_LENGTH;
+
 /**
  * Main class that implements the client
  *
@@ -44,7 +44,7 @@ public class RequestSender {
     private void run() {
         try {
             socket = new DatagramSocket();
-            socket.setSoTimeout(200);
+            socket.setSoTimeout(TIMEOUT);
             Scanner sc = new Scanner(System.in);
             while (true) {
                 System.out.print(">>> ");
@@ -153,15 +153,8 @@ public class RequestSender {
                     InetAddress address = InetAddress.getByName("localhost");
                     DatagramPacket packet = new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                             address, SERVER_PORT);
-                    socket.send(packet);
 
-                    DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(reply);
-                    Deserializer deserializer = new Deserializer(buffer);
-                    ServiceResponse response = new ServiceResponse();
-                    response.read(deserializer);
-                    log.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
-
+                    ServiceResponse response = sendRequest(packet);
                     if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
                         startMonitoring();
                     }
@@ -179,19 +172,47 @@ public class RequestSender {
         }
     }
 
+    private ServiceResponse sendRequest(DatagramPacket packet) {
+        try {
+            Boolean timeout = true;
+            while (timeout) {
+                socket.send(packet);
+                DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+                try {
+                    socket.receive(reply);
+                } catch (SocketTimeoutException e) {
+                    continue;
+                }
+                timeout = false;
+            }
+
+            Deserializer deserializer = new Deserializer(buffer);
+            ServiceResponse response = new ServiceResponse();
+            response.read(deserializer);
+            log.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
+            return response;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private void startMonitoring() {
         try {
             socket.setSoTimeout(0);
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                
                 socket.receive(packet);
+
+
                 Deserializer deserializer = new Deserializer(buffer);
                 ServiceResponse response = new ServiceResponse();
                 response.read(deserializer);
                 log.log(Level.INFO, "Type: " + response.getResponseType());
                 log.log(Level.INFO, "Type: " + response.getResponseMessage());
-                if (response.getResponseType() == 'k') {
-                    socket.setSoTimeout(500);
+                if (response.getResponseType() == 'g') {
+                    socket.setSoTimeout(TIMEOUT);
                     return;
                 }
                 log.log(Level.INFO, "Update: Account No. " + response.getResponseAccount() +
