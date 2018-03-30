@@ -13,7 +13,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,24 +27,20 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
  */
 public class RequestReceiver {
 
+    private HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
+    private int databaseSize = accountDatabase.size();
+    private MonitoringClients clients = new MonitoringClients();
+    private HashMap<Client, HashMap<Integer, ServiceResponse>> clientsLog = new HashMap<>();
+    private DatagramSocket socket = null;
+    private Deserializer deserializer = null;
+    private Serializer serializer = null;
+    private byte[] receiveBuffer = new byte[BUFFER_SIZE];
+
     private static final Logger log = Logger.getLogger(RequestReceiver.class.getName());
     private static Options options = new Options();
 
     public static void main(String[] args) {
-        // Default use at-least-once invocation semantic
-        // If the first argument is "1", use at-most-once invocation semantic
-        // boolean atMostOnce = args.length > 0 && args[0].equals("1");
-        // System.out.println("at most once: " + atMostOnce);
-
-        // Second argument indicates the mode of datagram socket.
-        // "1": reply packets from server will lost for 3 times
-        // "2": request packets from client will lost for 3 times
-        // "": normal datagramsocket.
-        // String unstable = args.length > 1 ? args[1] : "";
-        // System.out.println("unstable datagram: " + unstable);
-
         //Arguments Handle
-
         Boolean atMostOnce = false;
 
         options.addOption("h", "help", false, "Show help.");
@@ -77,11 +72,11 @@ public class RequestReceiver {
 
         System.out.println(atMostOnce);
 
-        HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
-        int databaseSize = accountDatabase.size();
+        new RequestReceiver().run(atMostOnce);
+    }
 
-        MonitoringClients clients = new MonitoringClients();
-        HashMap <Character, ServiceHandler> handlerMap = new HashMap<>();
+    public void run(boolean atMostOnce) {
+        HashMap<Character, ServiceHandler> handlerMap = new HashMap<>();
         handlerMap.put('a', new AccountCancellationHandler(accountDatabase));
         handlerMap.put('b', new AccountCreationHandler(accountDatabase));
         handlerMap.put('c', new AccountMonitoringHandler(accountDatabase, clients));
@@ -89,15 +84,9 @@ public class RequestReceiver {
         handlerMap.put('e', new BalanceUpdateHandler(accountDatabase));
         handlerMap.put('f', new TransferHandler(accountDatabase));
 
-        HashMap<Client, HashMap<Integer, ServiceResponse>> clientsLog = new HashMap<>();
 
-        DatagramSocket socket = null;
-        Deserializer deserializer = null;
-        Serializer serializer = null;
         try {
-            byte[] receiveBuffer = new byte[BUFFER_SIZE];
             socket = new DatagramSocket(SERVER_PORT);
-
             System.out.println("Start listening");
             while (true) {
                 // receive request and parse message
@@ -113,7 +102,7 @@ public class RequestReceiver {
                 ServiceResponse response;
                 // Check client in log. If not exist, register and log a new client
                 Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
-                Boolean registered = checkClient(tempClient, clientsLog);
+                Boolean registered = checkClient(tempClient);
 
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
@@ -124,11 +113,11 @@ public class RequestReceiver {
                     response = handlerMap.get(op).handleRequest(serviceRequest);
                 }
 
-                sendResponse(serializer, response, requestPacket.getAddress(), requestPacket.getPort(), socket);
+                sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
 
                 // send callbacks
                 if (op != 'c')
-                    sendCallbacks(socket, clients, response, serializer);
+                    sendCallbacks(response);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,8 +128,7 @@ public class RequestReceiver {
         }
     }
 
-    private static void sendResponse(Serializer serializer, ServiceResponse response,
-                                     InetAddress address, int port, DatagramSocket socket) {
+    private void sendResponse(ServiceResponse response, InetAddress address, int port) {
         // send response
         response.write(serializer);
         DatagramPacket responsePacket =
@@ -153,7 +141,7 @@ public class RequestReceiver {
         }
     }
 
-    private static Boolean checkRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
+    private Boolean checkRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
         if (history.containsKey(id)) {
             System.out.println("Request already handled.");
             return true;
@@ -163,18 +151,18 @@ public class RequestReceiver {
         }
     }
 
-    private static Boolean checkClient(Client client, HashMap<Client, HashMap<Integer, ServiceResponse>> log) {
-        if (log.containsKey(client)) {
+    private Boolean checkClient(Client client) {
+        if (clientsLog.containsKey(client)) {
             System.out.println("Client exists.");
             return true;
         } else {
-            log.put(client,new HashMap<Integer, ServiceResponse>());
+            clientsLog.put(client,new HashMap<Integer, ServiceResponse>());
             System.out.println("Client registered.");
             return false;
         }
     }
 
-    private static void sendCallbacks(DatagramSocket socket, MonitoringClients clients, ServiceResponse response, Serializer serializer) {
+    private void sendCallbacks(ServiceResponse response) {
         System.out.println("Sending callbacks");
         if (response.getResponseCode() == SUCCESS) {
             for (Client client : clients.getClients()) {
@@ -188,9 +176,6 @@ public class RequestReceiver {
                 }
             }
         }
-    }
-
-    private static void sendTerminateMonitoringMessage(DatagramSocket socket, Client client) {
     }
 
     private static void help() {
