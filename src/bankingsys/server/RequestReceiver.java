@@ -87,7 +87,7 @@ public class RequestReceiver {
 
         try {
             socket = new DatagramSocket(SERVER_PORT);
-            System.out.println("Start listening");
+            log.log(Level.INFO, "Start listening");
             while (true) {
                 // receive request and parse message
                 DatagramPacket requestPacket =

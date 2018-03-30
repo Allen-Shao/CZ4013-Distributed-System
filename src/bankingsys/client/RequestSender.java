@@ -9,6 +9,8 @@ import bankingsys.server.model.BankAccount;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
@@ -28,6 +30,9 @@ import static bankingsys.Constant.PASSWORD_LENGTH;
  */
 
 public class RequestSender {
+
+    private static final Logger log = Logger.getLogger(RequestSender.class.getName());
+
     private DatagramSocket socket = null;
     private byte[] buffer = new byte[BUFFER_SIZE];
     private Integer requestID = 0;
@@ -51,7 +56,7 @@ public class RequestSender {
                 switch (commandType) {
                     case "create":
                         if (commandSplits[2].length() != PASSWORD_LENGTH) {
-                            System.out.println("Password length must be 6");
+                            log.log(Level.SEVERE, "Password length must be " + PASSWORD_LENGTH);
                             continue;
                         }
                         request = new ServiceRequest(
@@ -155,16 +160,14 @@ public class RequestSender {
                     Deserializer deserializer = new Deserializer(buffer);
                     ServiceResponse response = new ServiceResponse();
                     response.read(deserializer);
-                    System.out.println(response.getResponseCode());
-                    System.out.println(response.getResponseMessage());
+                    log.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
 
                     if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
                         startMonitoring();
                     }
                 } else {
-                    System.out.println("Command parse error.");
+                    log.log(Level.SEVERE, "Command parse error.");
                 }
-
                 requestID++;
             }
         } catch (Exception e) {
@@ -185,13 +188,13 @@ public class RequestSender {
                 Deserializer deserializer = new Deserializer(buffer);
                 ServiceResponse response = new ServiceResponse();
                 response.read(deserializer);
-                System.out.println("Type: " + response.getResponseType());
-                System.out.println("Message: " + response.getResponseMessage());
+                log.log(Level.INFO, "Type: " + response.getResponseType());
+                log.log(Level.INFO, "Type: " + response.getResponseMessage());
                 if (response.getResponseType() == 'k') {
                     socket.setSoTimeout(500);
                     return;
                 }
-                System.out.println("Update: Account No. " + response.getResponseAccount() +
+                log.log(Level.INFO, "Update: Account No. " + response.getResponseAccount() +
                         " now has balance " + response.getResponseAmount());
             }
         } catch (IOException e) {
