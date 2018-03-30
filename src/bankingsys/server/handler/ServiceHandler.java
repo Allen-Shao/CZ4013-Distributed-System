@@ -16,4 +16,14 @@ public abstract class ServiceHandler {
         this.accounts = accounts;
     }
     public abstract ServiceResponse handleRequest(ServiceRequest request);
+
+    protected boolean authenticate(ServiceRequest request) {
+        if (accounts.containsKey(request.getRequestAccount())) {
+            BankAccount account = accounts.get(request.getRequestAccount());
+            if (account.getPassword().equals(request.getRequestPassword()) &&
+                    account.getName().equals(request.getRequestName()))
+                return true;
+        }
+        return false;
+    }
 }

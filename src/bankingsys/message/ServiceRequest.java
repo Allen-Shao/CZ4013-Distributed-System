@@ -5,6 +5,8 @@ import bankingsys.io.Serializable;
 import bankingsys.io.Serializer;
 import bankingsys.server.model.BankAccount.Currency;
 
+import java.net.InetAddress;
+
 /**
  * Object that encapsulates request message
  */
@@ -17,6 +19,7 @@ public class ServiceRequest implements Serializable {
     private Float requestAmount;
     private Integer requestTargetAccount;
     private Currency requestCurrency;
+    private InetAddress requestAddress;
 
     public ServiceRequest() {}
 
@@ -30,6 +33,14 @@ public class ServiceRequest implements Serializable {
         this.requestAmount = requestAmount;
         this.requestTargetAccount = requestTargetAccount;
         this.requestCurrency = requestCurrency;
+    }
+
+    public InetAddress getRequestAddress() {
+        return requestAddress;
+    }
+
+    public void setRequestAddress(InetAddress requestAddress) {
+        this.requestAddress = requestAddress;
     }
 
     public Character getRequestType(){

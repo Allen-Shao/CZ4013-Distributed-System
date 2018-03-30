@@ -6,26 +6,33 @@ import bankingsys.io.Serializer;
 
 import java.util.Map;
 
+import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+
 /**
  * Created by koallen on 29/3/18.
  */
 public class ServiceResponse implements Serializable {
-    private Integer responseCode;
 
+    public enum ResponseType {
+        SUCCESS,
+        FAILURE;
+    }
+
+    private ResponseType responseCode;
     private Integer responseAccount;
-    private String responseError;
+    private String responseMessage;
     private Float responseAmount;
 
     public ServiceResponse() {}
 
-    public ServiceResponse(Integer responseCode, Integer responseAccount, String responseError, Float responseAmount) {
+    public ServiceResponse(ResponseType responseCode, Integer responseAccount, String responseMessage, Float responseAmount) {
         this.responseCode = responseCode;
         this.responseAccount = responseAccount;
-        this.responseError = responseError;
+        this.responseMessage = responseMessage;
         this.responseAmount = responseAmount;
     }
 
-    public int getResponseCode() {
+    public ResponseType getResponseCode() {
         return responseCode;
     }
 
@@ -33,8 +40,8 @@ public class ServiceResponse implements Serializable {
         return responseAccount;
     }
 
-    public String getResponseError() {
-        return responseError;
+    public String getResponseMessage() {
+        return responseMessage;
     }
 
     public Float getResponseAmount() {
@@ -43,23 +50,25 @@ public class ServiceResponse implements Serializable {
 
     @Override
     public void write(Serializer serializer) {
-        serializer.writeInt(responseCode);
-        if (responseCode == 200) {
-            serializer.writeInt(this.responseAccount);
-            serializer.writeFloat(this.responseAmount);
+        serializer.writeInt(responseCode.ordinal());
+        if (responseCode == SUCCESS) {
+            if (responseAccount != null)
+                serializer.writeInt(this.responseAccount);
+            if (responseAmount != null)
+                serializer.writeFloat(this.responseAmount);
         } else {
-            serializer.writeString(this.responseError);
+            serializer.writeString(this.responseMessage);
         }
     }
 
     @Override
     public void read(Deserializer deserializer) {
-        responseCode = deserializer.readInt();
-        if (responseCode == 200) {
+        responseCode = ResponseType.values()[deserializer.readInt()];
+        if (responseCode == SUCCESS) {
             this.responseAccount = deserializer.readInt();
             this.responseAmount = deserializer.readFloat();
         } else {
-            this.responseError = deserializer.readString();
+            this.responseMessage = deserializer.readString();
         }
     }
 }

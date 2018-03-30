@@ -6,13 +6,18 @@ import bankingsys.message.ServiceResponse;
 import bankingsys.server.handler.*;
 import bankingsys.server.model.BankAccount;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 import static bankingsys.Constant.BUFFER_SIZE;
+import static bankingsys.Constant.MONITOR_PORT;
 import static bankingsys.Constant.SERVER_PORT;
+import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
 
 /**
  * Main class that implements the server
@@ -41,10 +46,12 @@ public class RequestReceiver {
 
         int databaseSize = accountDatabase.size();
 
-        HashMap <Character, ServiceHandler> handlerMap = new HashMap<Character, ServiceHandler>();
+        HashSet<InetAddress> clients = new HashSet<>();
+
+        HashMap <Character, ServiceHandler> handlerMap = new HashMap<>();
         handlerMap.put('a', new AccountCancellationHandler(accountDatabase));
         handlerMap.put('b', new AccountCreationHandler(accountDatabase));
-        handlerMap.put('c', new AccountMonitoringHandler(accountDatabase));
+        handlerMap.put('c', new AccountMonitoringHandler(accountDatabase, clients));
         handlerMap.put('d', new BalanceCheckHandler(accountDatabase));
         handlerMap.put('e', new BalanceUpdateHandler(accountDatabase));
         handlerMap.put('f', new TransferHandler(accountDatabase));
@@ -59,21 +66,29 @@ public class RequestReceiver {
 
             System.out.println("Start listening");
             while (true) {
+                // receive request and parse message
                 DatagramPacket requestPacket =
                         new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(requestPacket);
                 deserializer = new Deserializer(receiveBuffer);
                 ServiceRequest serviceRequest = new ServiceRequest();
                 serviceRequest.read(deserializer);
+                serviceRequest.setRequestAddress(requestPacket.getAddress());
 
+                // handle the request
                 Character op = serviceRequest.getRequestType();
                 ServiceResponse response =  handlerMap.get(op).handleRequest(serviceRequest);
+
+                // send response
                 serializer = new Serializer();
                 response.write(serializer);
                 DatagramPacket responsePacket =
                         new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                                 requestPacket.getAddress(), requestPacket.getPort());
                 socket.send(responsePacket);
+
+                // send callbacks
+                sendCallbacks(socket, clients, response, serializer);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -97,5 +112,20 @@ public class RequestReceiver {
         BankAccount.Currency currency = BankAccount.Currency.SGD;
         float balance = (float) 0.0;
         return new BankAccount(accountNumber, name, password, currency, balance);
+    }
+
+    private static void sendCallbacks(DatagramSocket socket, HashSet<InetAddress> clients, ServiceResponse response, Serializer serializer) {
+        if (response.getResponseCode() == SUCCESS) {
+            for (InetAddress client : clients) {
+                DatagramPacket callbackPacket =
+                        new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
+                                client, MONITOR_PORT);
+                try {
+                    socket.send(callbackPacket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

@@ -6,12 +6,15 @@ import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
 import bankingsys.server.model.BankAccount;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
 
 import static bankingsys.Constant.BUFFER_SIZE;
+import static bankingsys.Constant.MONITOR_PORT;
 import static bankingsys.Constant.SERVER_PORT;
+import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
 
 /**
  * Main class that implements the client
@@ -21,7 +24,7 @@ import static bankingsys.Constant.SERVER_PORT;
  * - Close Name AccountNumber Password
  * - Deposit Name AccountNumber Password CurrencyType Amount
  * - Withdraw Name AccountNumber Password CurrencyType Amount
- * - Moniter
+ * - Monitor Interval
  * - Check Name AccountNumber Password
  * - Transfer Name AccountNumber Password TargetAccount Amount
  */
@@ -41,7 +44,7 @@ public class RequestSender {
                 String commandType = commandSplits[0];
 
                 ServiceRequest request = null;
-                switch (commandType){
+                switch (commandType) {
                     case "Create":
                         request = new ServiceRequest(
                                 'b',
@@ -82,7 +85,15 @@ public class RequestSender {
                                 null,
                                 BankAccount.Currency.valueOf(commandSplits[4]));
                         break;
-                    case "Moniter":
+                    case "Monitor":
+                        request = new ServiceRequest(
+                                'c',
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null);
                         break;
                     case "Check":
                         request = new ServiceRequest(
@@ -121,6 +132,10 @@ public class RequestSender {
                     ServiceResponse response = new ServiceResponse();
                     response.read(deserializer);
                     System.out.println(response.getResponseCode());
+
+                    if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
+                        startMonitoring();
+                    }
                 }
             }
         } catch (Exception e) {
@@ -129,6 +144,27 @@ public class RequestSender {
             if (socket != null) {
                 socket.close();
             }
+        }
+    }
+
+    private static void startMonitoring() {
+        DatagramSocket monitoringSocket = null;
+        byte[] buffer = null;
+        try {
+            buffer = new byte[BUFFER_SIZE];
+            monitoringSocket = new DatagramSocket(MONITOR_PORT);
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            monitoringSocket.receive(packet);
+            Deserializer deserializer = new Deserializer(buffer);
+            ServiceResponse response = new ServiceResponse();
+            response.read(deserializer);
+            System.out.println("Update: Account No. " + response.getResponseAccount() +
+                    " now has balance " + response.getResponseAmount());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (monitoringSocket != null)
+                monitoringSocket.close();
         }
     }
 }

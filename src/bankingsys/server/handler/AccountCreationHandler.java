@@ -6,17 +6,25 @@ import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
 
+import static bankingsys.message.ServiceResponse.ResponseType.FAILURE;
+import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+
 /**
- * Created by koallen on 29/3/18.
+ * Handler for account creation
  */
 public class AccountCreationHandler extends ServiceHandler {
+    private int currentId = 0;
+
     public AccountCreationHandler(HashMap<Integer, BankAccount> accounts) {
         super(accounts);
     }
 
     @Override
     public ServiceResponse handleRequest(ServiceRequest request) {
-        System.out.println("Called creation handler");
-        return new ServiceResponse(200, 101, null, request.getRequestAmount());
+        BankAccount newAccount = new BankAccount(currentId, request.getRequestName(),
+                request.getRequestPassword(), request.getRequestCurrency(), request.getRequestAmount());
+        accounts.put(newAccount.getAccountNumber(), newAccount);
+        ++currentId;
+        return new ServiceResponse(SUCCESS, newAccount.getAccountNumber(), null, newAccount.getBalance());
     }
 }
