@@ -14,6 +14,7 @@ public class Deserializer {
 
     public char readChar() {
         char c = (char) buffer[bufferPosition];
+        bufferPosition += 1;
         return c;
     }
 
@@ -33,7 +34,6 @@ public class Deserializer {
 
     public String readString() {
         int stringLength = readInt();
-        System.out.println(stringLength);
         byte[] stringBuffer = new byte[stringLength];
         System.arraycopy(buffer, bufferPosition, stringBuffer, 0, stringLength);
         String str = new String(stringBuffer);

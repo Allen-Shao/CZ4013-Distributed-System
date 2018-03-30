@@ -20,10 +20,10 @@ public class Serializer {
 
     public void writeInt(int input) {
         extendBuffer(4);
-        buffer[bufferLength] = (byte) (input >> 24);
-        buffer[bufferLength + 1] = (byte) (input >> 16);
-        buffer[bufferLength + 2] = (byte) (input >> 8);
-        buffer[bufferLength + 3] = (byte) (input);
+        buffer[bufferLength] = (byte) (input >> 24 & 0xFF);
+        buffer[bufferLength + 1] = (byte) (input >> 16 & 0xFF);
+        buffer[bufferLength + 2] = (byte) (input >> 8 & 0xFF);
+        buffer[bufferLength + 3] = (byte) (input & 0xFF);
         bufferLength += 4;
     }
 

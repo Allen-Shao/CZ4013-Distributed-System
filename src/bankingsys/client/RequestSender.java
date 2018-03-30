@@ -1,7 +1,9 @@
 package bankingsys.client;
 
+import bankingsys.io.Deserializer;
 import bankingsys.io.Serializer;
 import bankingsys.message.ServiceRequest;
+import bankingsys.message.ServiceResponse;
 import bankingsys.server.RequestReceiver;
 import bankingsys.server.model.BankAccount;
 
@@ -106,6 +108,13 @@ public class RequestSender {
             if (request != null) {
                 Serializer serializer = new Serializer();
                 request.write(serializer);
+
+                //System.out.println(javax.xml.bind.DatatypeConverter.printHexBinary(serializer.getBuffer()));
+                //Deserializer deserializer = new Deserializer(serializer.getBuffer());
+                //System.out.println(deserializer.readChar());
+                //System.out.println(deserializer.readString());
+
+
                 InetAddress address = InetAddress.getByName("localhost");
                 DatagramPacket packet = new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                         address, RequestReceiver.SERVER_PORT);
@@ -113,7 +122,10 @@ public class RequestSender {
                 socket.send(packet);
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                 socket.receive(reply);
-                System.out.println(new String(buffer));
+                Deserializer deserializer = new Deserializer(buffer);
+                ServiceResponse response = new ServiceResponse();
+                response.read(deserializer);
+                System.out.println(response.getResponseCode());
             }
         }
     }
