@@ -18,6 +18,8 @@ public class ServiceRequest implements Serializable {
     private Integer requestTargetAccount;
     private Currency requestCurrency;
 
+    public ServiceRequest() {}
+
     public ServiceRequest(Character requestType, String requestName, int requestAccount,
                           String requestPassword, Float requestAmount, int requestTargetAccount,
                           Currency requestCurrency) {

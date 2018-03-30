@@ -43,12 +43,12 @@ public class RequestReceiver {
         int databaseSize = accountDatabase.size();
 
         HashMap <Character, ServiceHandler> handlerMap = new HashMap<Character, ServiceHandler>();
-        handlerMap.put('a', new AccountCancellationHandler());
-        handlerMap.put('b', new AccountCreationHandler());
-        handlerMap.put('c', new AccountMonitoringHandler());
-        handlerMap.put('d', new BalanceCheckHandler());
-        handlerMap.put('e', new BalanceUpdateHandler());
-        handlerMap.put('f', new TransferHandler());
+        handlerMap.put('a', new AccountCancellationHandler(accountDatabase));
+        handlerMap.put('b', new AccountCreationHandler(accountDatabase));
+        handlerMap.put('c', new AccountMonitoringHandler(accountDatabase));
+        handlerMap.put('d', new BalanceCheckHandler(accountDatabase));
+        handlerMap.put('e', new BalanceUpdateHandler(accountDatabase));
+        handlerMap.put('f', new TransferHandler(accountDatabase));
 
 
         DatagramSocket socket = null;
@@ -89,12 +89,12 @@ public class RequestReceiver {
     private static BankAccount randomAccount(int accountNumber){
         String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         Random random=new Random();
-        StringBuffer sb=new StringBuffer();
+        StringBuffer randomName=new StringBuffer();
         for(int i=0;i<(5+(int)random.nextInt(5));i++){
             int number=random.nextInt(52);
-            sb.append(str.charAt(number));
+            randomName.append(str.charAt(number));
         }
-        String name = sb.toString();
+        String name = randomName.toString();
         String password = "123456";
         BankAccount.Currency currency = BankAccount.Currency.SGD;
         float balance = (float) 0.0;
