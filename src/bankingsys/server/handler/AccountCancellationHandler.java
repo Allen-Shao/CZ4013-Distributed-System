@@ -24,7 +24,7 @@ public class AccountCancellationHandler extends ServiceHandler {
         ServiceResponse response;
         if (accounts.containsKey(request.getRequestAccount())) {
             accounts.remove(request.getRequestAccount());
-            response = new ServiceResponse('a', SUCCESS, 0, "Account closed", 0.0f);
+            response = new ServiceResponse('a', SUCCESS, null, "Account closed", null);
             server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
             server.sendCallbacks(response);
             return;

@@ -39,12 +39,12 @@ public class AccountMonitoringHandler extends ServiceHandler {
                 public void run() {
                     clients.removeFromClients(client);
                     ServiceResponse terminateResponse = new ServiceResponse('k',
-                            SUCCESS, 0, "Monitoring terminated", 0.0f);
+                            SUCCESS, null, "Monitoring terminated", null);
                     server.sendResponse(terminateResponse, request.getRequestAddress(), request.getRequestPort());
                     System.out.println("Client removed");
                 }
             }, request.getRequestDelay() * 1000);
-            response = new ServiceResponse('c', SUCCESS, 0, "Monitoring callback registered", 0.0f);
+            response = new ServiceResponse('c', SUCCESS, null, "Monitoring callback registered", null);
             server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
             return;
         }

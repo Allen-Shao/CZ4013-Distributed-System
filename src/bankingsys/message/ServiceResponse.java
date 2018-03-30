@@ -66,8 +66,10 @@ public class ServiceResponse implements Serializable {
             case 'd':
             case 'e':
             case 'f':
-                serializer.writeInt(responseAccount);
-                serializer.writeFloat(responseAmount);
+                if (responseCode == SUCCESS) {
+                    serializer.writeInt(responseAccount);
+                    serializer.writeFloat(responseAmount);
+                }
                 break;
         }
         serializer.writeString(responseMessage);
@@ -82,8 +84,10 @@ public class ServiceResponse implements Serializable {
             case 'd':
             case 'e':
             case 'f':
-                responseAccount = deserializer.readInt();
-                responseAmount = deserializer.readFloat();
+                if (responseCode == SUCCESS) {
+                    responseAccount = deserializer.readInt();
+                    responseAmount = deserializer.readFloat();
+                }
                 break;
         }
         this.responseMessage = deserializer.readString();
