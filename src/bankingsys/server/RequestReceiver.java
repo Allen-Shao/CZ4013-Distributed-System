@@ -106,7 +106,7 @@ public class RequestReceiver {
 
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
-                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), false);
                     //if (op != 'c')
                     //    sendCallbacks(response);
                 } else {
@@ -125,7 +125,7 @@ public class RequestReceiver {
         }
     }
 
-    public void sendResponse(ServiceResponse response, InetAddress address, int port) {
+    public void sendResponse(ServiceResponse response, InetAddress address, int port, boolean simulation) {
         // send response
         serializer = new Serializer();
         response.write(serializer);
@@ -133,6 +133,9 @@ public class RequestReceiver {
                 new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                         address, port);
         try {
+            if (simulation){
+                //TODO: failure
+            }
             socket.send(responsePacket);
         } catch (IOException e) {
             e.printStackTrace();

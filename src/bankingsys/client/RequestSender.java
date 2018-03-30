@@ -176,6 +176,7 @@ public class RequestSender {
             Boolean timeout = true;
             while (timeout) {
                 try {
+                    //TODO: simulate sending failure.
                     socket.send(packet);
                     DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                     socket.receive(reply);
