@@ -6,12 +6,12 @@ import bankingsys.message.ServiceResponse;
 import bankingsys.server.handler.*;
 import bankingsys.server.model.BankAccount;
 import bankingsys.server.model.Client;
+import bankingsys.server.model.MonitoringClients;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
@@ -35,13 +35,10 @@ public class RequestReceiver {
         // String unstable = args.length > 1 ? args[1] : "";
         // System.out.println("unstable datagram: " + unstable);
 
-
         HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
-
         int databaseSize = accountDatabase.size();
 
-        HashSet<Client> clients = new HashSet<>();
-
+        MonitoringClients clients = new MonitoringClients();
         HashMap <Character, ServiceHandler> handlerMap = new HashMap<>();
         handlerMap.put('a', new AccountCancellationHandler(accountDatabase));
         handlerMap.put('b', new AccountCreationHandler(accountDatabase));
@@ -127,10 +124,10 @@ public class RequestReceiver {
         }
     }
 
-    private static void sendCallbacks(DatagramSocket socket, HashSet<Client> clients, ServiceResponse response, Serializer serializer) {
+    private static void sendCallbacks(DatagramSocket socket, MonitoringClients clients, ServiceResponse response, Serializer serializer) {
         System.out.println("Sending callbacks");
         if (response.getResponseCode() == SUCCESS) {
-            for (Client client : clients) {
+            for (Client client : clients.getClients()) {
                 DatagramPacket callbackPacket =
                         new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                                 client.getClientAddress(), client.getClientPort());
@@ -141,5 +138,8 @@ public class RequestReceiver {
                 }
             }
         }
+    }
+
+    private static void sendTerminateMonitoringMessage(DatagramSocket socket, Client client) {
     }
 }

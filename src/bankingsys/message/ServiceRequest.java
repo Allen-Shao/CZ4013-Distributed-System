@@ -21,6 +21,11 @@ public class ServiceRequest implements Serializable {
     private Integer requestTargetAccount;
     private Currency requestCurrency;
     private InetAddress requestAddress;
+    private Integer requestDelay;
+
+    public int getRequestDelay() {
+        return requestDelay;
+    }
 
     public int getRequestPort() {
         return requestPort;
@@ -36,7 +41,7 @@ public class ServiceRequest implements Serializable {
 
     public ServiceRequest(Integer requestID, Character requestType, String requestName,
                           Integer requestAccount, String requestPassword, Float requestAmount,
-                          Integer requestTargetAccount, Currency requestCurrency) {
+                          Integer requestTargetAccount, Currency requestCurrency, Integer requestDelay) {
         this.requestID = requestID;
         this.requestType = requestType;
         this.requestName = requestName;
@@ -45,6 +50,7 @@ public class ServiceRequest implements Serializable {
         this.requestAmount = requestAmount;
         this.requestTargetAccount = requestTargetAccount;
         this.requestCurrency = requestCurrency;
+        this.requestDelay = requestDelay;
     }
 
     public Integer getRequestID() {
