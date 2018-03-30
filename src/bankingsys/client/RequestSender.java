@@ -37,6 +37,7 @@ public class RequestSender {
         try {
             socket = new DatagramSocket();
             Scanner sc = new Scanner(System.in);
+            Integer requestID = 0;
             while (true) {
                 System.out.print(">>> ");
                 String command = sc.nextLine();
@@ -50,6 +51,7 @@ public class RequestSender {
                             continue;
                         }
                         request = new ServiceRequest(
+                                requestID,
                                 'b',
                                 commandSplits[1],
                                 null,
@@ -60,6 +62,7 @@ public class RequestSender {
                         break;
                     case "close":
                         request = new ServiceRequest(
+                                requestID,
                                 'a',
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
@@ -70,6 +73,7 @@ public class RequestSender {
                         break;
                     case "deposit":
                         request = new ServiceRequest(
+                                requestID,
                                 'e',
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
@@ -80,6 +84,7 @@ public class RequestSender {
                         break;
                     case "withdraw":
                         request = new ServiceRequest(
+                                requestID,
                                 'e',
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
@@ -90,6 +95,7 @@ public class RequestSender {
                         break;
                     case "monitor":
                         request = new ServiceRequest(
+                                requestID,
                                 'c',
                                 null,
                                 null,
@@ -100,6 +106,7 @@ public class RequestSender {
                         break;
                     case "Check":
                         request = new ServiceRequest(
+                                requestID,
                                 'd',
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
@@ -110,6 +117,7 @@ public class RequestSender {
                         break;
                     case "transfer":
                         request = new ServiceRequest(
+                                requestID,
                                 'f',
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
@@ -144,6 +152,8 @@ public class RequestSender {
                 } else {
                     System.out.println("Command parse error.");
                 }
+
+                requestID++;
             }
         } catch (Exception e) {
             e.printStackTrace();

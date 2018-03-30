@@ -5,6 +5,7 @@ import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
 import bankingsys.server.handler.*;
 import bankingsys.server.model.BankAccount;
+import bankingsys.server.model.Client;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -56,6 +57,8 @@ public class RequestReceiver {
         handlerMap.put('e', new BalanceUpdateHandler(accountDatabase));
         handlerMap.put('f', new TransferHandler(accountDatabase));
 
+        HashMap<Integer, ServiceResponse> clientHistory = new HashMap<>();
+        HashMap<Client, HashMap<Integer, ServiceResponse>> clientsLog = new HashMap<>();
 
         DatagramSocket socket = null;
         Deserializer deserializer = null;
@@ -70,6 +73,16 @@ public class RequestReceiver {
                 DatagramPacket requestPacket =
                         new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(requestPacket);
+
+                // Check client in log. If not exist, register and log a new client
+                Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
+                if (CheckClient(tempClient, clientsLog)) {
+                    if (CheckRequestHistory(clientsLog.get(tempClient), 0)) {
+
+                    }
+                }
+
+
                 deserializer = new Deserializer(receiveBuffer);
                 ServiceRequest serviceRequest = new ServiceRequest();
                 serviceRequest.read(deserializer);
@@ -96,6 +109,27 @@ public class RequestReceiver {
             if (socket != null) {
                 socket.close();
             }
+        }
+    }
+
+    private static Boolean CheckRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
+        if (history.containsKey(id)) {
+            System.out.println("Request already handled.");
+            return true;
+        } else {
+            System.out.println("New request.");
+            return false;
+        }
+    }
+
+    private static Boolean CheckClient(Client client, HashMap<Client, HashMap<Integer, ServiceResponse>> log) {
+        if (log.containsKey(client)) {
+            System.out.println("Client exists.");
+            return true;
+        } else {
+            log.put(client,new HashMap<Integer, ServiceResponse>());
+            System.out.println("Client registered.");
+            return false;
         }
     }
 

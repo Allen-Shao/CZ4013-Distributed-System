@@ -12,6 +12,7 @@ import java.net.InetAddress;
  */
 public class ServiceRequest implements Serializable {
 
+    private Integer requestID;
     private Character requestType;
     private String requestName;
     private Integer requestAccount;
@@ -23,9 +24,10 @@ public class ServiceRequest implements Serializable {
 
     public ServiceRequest() {}
 
-    public ServiceRequest(Character requestType, String requestName, Integer requestAccount,
-                          String requestPassword, Float requestAmount, Integer requestTargetAccount,
-                          Currency requestCurrency) {
+    public ServiceRequest(Integer requestID, Character requestType, String requestName,
+                          Integer requestAccount, String requestPassword, Float requestAmount,
+                          Integer requestTargetAccount, Currency requestCurrency) {
+        this.requestID = requestID;
         this.requestType = requestType;
         this.requestName = requestName;
         this.requestAccount = requestAccount;
@@ -33,6 +35,14 @@ public class ServiceRequest implements Serializable {
         this.requestAmount = requestAmount;
         this.requestTargetAccount = requestTargetAccount;
         this.requestCurrency = requestCurrency;
+    }
+
+    public Integer getRequestID() {
+        return requestID;
+    }
+
+    public void setRequestID(Integer requestID) {
+        this.requestID = requestID;
     }
 
     public InetAddress getRequestAddress() {
