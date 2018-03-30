@@ -39,10 +39,10 @@ public class RequestReceiver {
 
 
         HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
-        accountDatabase.put(0, randomAccount(0));
-        accountDatabase.put(1, randomAccount(1));
-        accountDatabase.put(2, randomAccount(2));
-        accountDatabase.put(3, randomAccount(3));
+//        accountDatabase.put(0, randomAccount(0));
+//        accountDatabase.put(1, randomAccount(1));
+//        accountDatabase.put(2, randomAccount(2));
+//        accountDatabase.put(3, randomAccount(3));
 
         int databaseSize = accountDatabase.size();
 

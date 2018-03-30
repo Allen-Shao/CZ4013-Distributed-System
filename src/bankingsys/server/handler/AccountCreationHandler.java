@@ -25,6 +25,9 @@ public class AccountCreationHandler extends ServiceHandler {
                 request.getRequestPassword(), request.getRequestCurrency(), request.getRequestAmount());
         accounts.put(newAccount.getAccountNumber(), newAccount);
         ++currentId;
-        return new ServiceResponse(SUCCESS, newAccount.getAccountNumber(), null, newAccount.getBalance());
+        return new ServiceResponse(SUCCESS, newAccount.getAccountNumber(),
+                "Account No." + Integer.toString(newAccount.getAccountNumber()) + " belonging to " + newAccount.getName() +
+                        " has been created with initial balance $" + Float.toString(newAccount.getBalance()),
+                newAccount.getBalance());
     }
 }
