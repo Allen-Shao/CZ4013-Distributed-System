@@ -6,13 +6,11 @@ import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
 import bankingsys.server.model.BankAccount;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
 
 import static bankingsys.Constant.BUFFER_SIZE;
-import static bankingsys.Constant.MONITOR_PORT;
 import static bankingsys.Constant.SERVER_PORT;
 import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
 import static bankingsys.Constant.PASSWORD_LENGTH;
@@ -47,7 +45,8 @@ public class RequestSender {
                 ServiceRequest request = null;
                 switch (commandType) {
                     case "create":
-                        if (commandSplits.length != PASSWORD_LENGTH) {
+                        if (commandSplits[2].length() != PASSWORD_LENGTH) {
+                            System.out.println("Password length must be 6");
                             continue;
                         }
                         request = new ServiceRequest(
@@ -145,9 +144,10 @@ public class RequestSender {
                     ServiceResponse response = new ServiceResponse();
                     response.read(deserializer);
                     System.out.println(response.getResponseCode());
+                    System.out.println(response.getResponseMessage());
 
                     if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
-                        startMonitoring();
+                        startMonitoring(socket, buffer);
                     }
                 } else {
                     System.out.println("Command parse error.");
@@ -164,24 +164,17 @@ public class RequestSender {
         }
     }
 
-    private static void startMonitoring() {
-        DatagramSocket monitoringSocket = null;
-        byte[] buffer = null;
+    private static void startMonitoring(DatagramSocket socket, byte[] buffer) {
         try {
-            buffer = new byte[BUFFER_SIZE];
-            monitoringSocket = new DatagramSocket(MONITOR_PORT);
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            monitoringSocket.receive(packet);
+            socket.receive(packet);
             Deserializer deserializer = new Deserializer(buffer);
             ServiceResponse response = new ServiceResponse();
             response.read(deserializer);
             System.out.println("Update: Account No. " + response.getResponseAccount() +
                     " now has balance " + response.getResponseAmount());
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (monitoringSocket != null)
-                monitoringSocket.close();
         }
     }
 }

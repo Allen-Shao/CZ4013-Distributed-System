@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Random;
 
 import static bankingsys.Constant.BUFFER_SIZE;
-import static bankingsys.Constant.MONITOR_PORT;
 import static bankingsys.Constant.SERVER_PORT;
 import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
 
@@ -47,7 +46,7 @@ public class RequestReceiver {
 
         int databaseSize = accountDatabase.size();
 
-        HashSet<InetAddress> clients = new HashSet<>();
+        HashSet<Client> clients = new HashSet<>();
 
         HashMap <Character, ServiceHandler> handlerMap = new HashMap<>();
         handlerMap.put('a', new AccountCancellationHandler(accountDatabase));
@@ -87,6 +86,7 @@ public class RequestReceiver {
                 ServiceRequest serviceRequest = new ServiceRequest();
                 serviceRequest.read(deserializer);
                 serviceRequest.setRequestAddress(requestPacket.getAddress());
+                serviceRequest.setRequestPort(requestPacket.getPort());
 
                 // handle the request
                 Character op = serviceRequest.getRequestType();
@@ -101,7 +101,8 @@ public class RequestReceiver {
                 socket.send(responsePacket);
 
                 // send callbacks
-                sendCallbacks(socket, clients, response, serializer);
+                if (op != 'c')
+                    sendCallbacks(socket, clients, response, serializer);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,12 +149,13 @@ public class RequestReceiver {
         return new BankAccount(accountNumber, name, password, currency, balance);
     }
 
-    private static void sendCallbacks(DatagramSocket socket, HashSet<InetAddress> clients, ServiceResponse response, Serializer serializer) {
+    private static void sendCallbacks(DatagramSocket socket, HashSet<Client> clients, ServiceResponse response, Serializer serializer) {
+        System.out.println("Sending callbacks");
         if (response.getResponseCode() == SUCCESS) {
-            for (InetAddress client : clients) {
+            for (Client client : clients) {
                 DatagramPacket callbackPacket =
                         new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
-                                client, MONITOR_PORT);
+                                client.getClientAddress(), client.getClientPort());
                 try {
                     socket.send(callbackPacket);
                 } catch (IOException e) {
