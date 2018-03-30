@@ -5,7 +5,7 @@ import java.net.InetAddress;
 /**
  * Created by koallen on 30/3/18.
  */
-public class Client implements Comparable {
+public class Client {
     private InetAddress clientAddress;
     private int clientPort;
 
@@ -23,14 +23,22 @@ public class Client implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
+    public boolean equals(Object o) {
         if (o instanceof Client) {
             Client other = (Client) o;
-            if (other.getClientAddress() == clientAddress &&
+            if (other.getClientAddress().equals(clientAddress) &&
                     other.getClientPort() == clientPort) {
-                return 0;
+                return true;
             }
         }
-        return 1;
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(clientAddress);
+        buffer.append(clientPort);
+        return buffer.toString().hashCode();
     }
 }

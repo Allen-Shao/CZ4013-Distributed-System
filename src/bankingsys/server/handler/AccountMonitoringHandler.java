@@ -26,9 +26,11 @@ public class AccountMonitoringHandler extends ServiceHandler {
     @Override
     public ServiceResponse handleRequest(ServiceRequest request) {
         System.out.println("AccountMonitoringHandler called");
-        if (!clients.contains(new Client(request.getRequestAddress(), request.getRequestPort()))) {
-            clients.add(new Client(request.getRequestAddress(), request.getRequestPort()));
-            return new ServiceResponse(SUCCESS, null, "Monitoring callback registered", null);
+        Client client = new Client(request.getRequestAddress(), request.getRequestPort());
+        if (!clients.contains(client)) {
+            clients.add(client);
+            System.out.println(clients);
+            return new ServiceResponse(SUCCESS, 0, "Monitoring callback registered", 0.0f);
         }
         return new ServiceResponse(FAILURE, null, "Monitoring callback already registered", null);
     }

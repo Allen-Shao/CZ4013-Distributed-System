@@ -52,13 +52,10 @@ public class ServiceResponse implements Serializable {
     public void write(Serializer serializer) {
         serializer.writeInt(responseCode.ordinal());
         if (responseCode == SUCCESS) {
-            if (responseAccount != null)
-                serializer.writeInt(this.responseAccount);
-            if (responseAmount != null)
-                serializer.writeFloat(this.responseAmount);
-        } else {
-            serializer.writeString(this.responseMessage);
+            serializer.writeInt(this.responseAccount);
+            serializer.writeFloat(this.responseAmount);
         }
+        serializer.writeString(this.responseMessage);
     }
 
     @Override
@@ -67,8 +64,7 @@ public class ServiceResponse implements Serializable {
         if (responseCode == SUCCESS) {
             this.responseAccount = deserializer.readInt();
             this.responseAmount = deserializer.readFloat();
-        } else {
-            this.responseMessage = deserializer.readString();
         }
+        this.responseMessage = deserializer.readString();
     }
 }
