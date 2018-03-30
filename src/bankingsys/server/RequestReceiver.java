@@ -13,6 +13,10 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.cli.*;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
@@ -22,6 +26,9 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
  * Main class that implements the server
  */
 public class RequestReceiver {
+
+    private static final Logger log = Logger.getLogger(RequestReceiver.class.getName());
+    private static Options options = new Options();
 
     public static void main(String[] args) {
         // Default use at-least-once invocation semantic
@@ -36,6 +43,36 @@ public class RequestReceiver {
         // String unstable = args.length > 1 ? args[1] : "";
         // System.out.println("unstable datagram: " + unstable);
 
+        //Arguments Handle
+
+        Boolean atMostOnce = false;
+
+        options.addOption("h", "help", false, "Show help.");
+        options.addOption("mode", "var", true, "Set mode to 'at-least-once' or 'at-most-once'.");
+        CommandLineParser parser = new DefaultParser();
+
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, args);
+
+            if (cmd.hasOption("h"))
+                help();
+
+            if (cmd.hasOption("mode")) {
+                log.log(Level.INFO, "Using cli argument -mode=" + cmd.getOptionValue("mode"));
+                // Whatever you want to do with the setting goes here
+                if (cmd.getOptionValue("mode").equals("at-most-once"))
+                    atMostOnce = true;
+            } else {
+                log.log(Level.SEVERE, "Missing mode option");
+                help();
+            }
+
+        } catch (ParseException e) {
+            log.log(Level.SEVERE, "Failed to parse command line properties", e);
+            help();
+        }
 
         HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
 
@@ -77,7 +114,7 @@ public class RequestReceiver {
                 Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
                 Boolean registered = checkClient(tempClient, clientsLog);
 
-                if (registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
+                if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
                 } else {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
@@ -150,5 +187,11 @@ public class RequestReceiver {
                 }
             }
         }
+    }
+
+    private static void help() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("Main", options);
+        System.exit(0);
     }
 }
