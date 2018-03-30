@@ -16,6 +16,7 @@ public class ServiceResponse implements Serializable {
         FAILURE;
     }
 
+    private Character responseType;
     private ResponseStatus responseCode;
     private Integer responseAccount;
     private String responseMessage;
@@ -28,6 +29,10 @@ public class ServiceResponse implements Serializable {
         this.responseAccount = responseAccount;
         this.responseMessage = responseMessage;
         this.responseAmount = responseAmount;
+    }
+
+    public Character getResponseType() {
+        return responseType;
     }
 
     public ResponseStatus getResponseCode() {
@@ -48,6 +53,7 @@ public class ServiceResponse implements Serializable {
 
     @Override
     public void write(Serializer serializer) {
+        serializer.writeChar(responseType);
         serializer.writeInt(responseCode.ordinal());
         if (responseCode == SUCCESS) {
             serializer.writeInt(this.responseAccount);
@@ -58,6 +64,7 @@ public class ServiceResponse implements Serializable {
 
     @Override
     public void read(Deserializer deserializer) {
+        responseType = deserializer.readChar();
         responseCode = ResponseStatus.values()[deserializer.readInt()];
         if (responseCode == SUCCESS) {
             this.responseAccount = deserializer.readInt();
