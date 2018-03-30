@@ -28,7 +28,7 @@ public class TransferHandler extends ServiceHandler {
             BankAccount targetAccount = accounts.get(request.getRequestTargetAccount());
             if (sourceAccount.getCurrencyType() == targetAccount.getCurrencyType()) {
                 sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
-                targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAccount());
+                targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAmount());
                 response = new ServiceResponse('f', SUCCESS, sourceAccount.getAccountNumber(),
                         "Transfered $" + Float.toString(request.getRequestAmount()) +
                                 " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
