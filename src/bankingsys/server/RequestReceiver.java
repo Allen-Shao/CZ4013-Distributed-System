@@ -134,6 +134,27 @@ public class RequestReceiver {
         }
     }
 
+    private static Boolean CheckRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
+        if (history.containsKey(id)) {
+            System.out.println("Request already handled.");
+            return true;
+        } else {
+            System.out.println("New request.");
+            return false;
+        }
+    }
+
+    private static Boolean CheckClient(Client client, HashMap<Client, HashMap<Integer, ServiceResponse>> log) {
+        if (log.containsKey(client)) {
+            System.out.println("Client exists.");
+            return true;
+        } else {
+            log.put(client,new HashMap<Integer, ServiceResponse>());
+            System.out.println("Client registered.");
+            return false;
+        }
+    }
+
     private static BankAccount randomAccount(int accountNumber){
         String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         Random random=new Random();
