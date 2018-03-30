@@ -36,7 +36,7 @@ public class RequestReceiver {
     private Serializer serializer = null;
     private byte[] receiveBuffer = new byte[BUFFER_SIZE];
 
-    private static final Logger log = Logger.getLogger(RequestReceiver.class.getName());
+    private static final Logger logger = Logger.getLogger(RequestReceiver.class.getName());
     private static Options options = new Options();
 
     public static void main(String[] args) {
@@ -56,17 +56,17 @@ public class RequestReceiver {
                 help();
 
             if (cmd.hasOption("mode")) {
-                log.log(Level.INFO, "Using cli argument -mode=" + cmd.getOptionValue("mode"));
+                logger.log(Level.INFO, "Using cli argument -mode=" + cmd.getOptionValue("mode"));
                 // Whatever you want to do with the setting goes here
                 if (cmd.getOptionValue("mode").equals("at-most-once"))
                     atMostOnce = true;
             } else {
-                log.log(Level.SEVERE, "Missing mode option");
+                logger.log(Level.SEVERE, "Missing mode option");
                 help();
             }
 
         } catch (ParseException e) {
-            log.log(Level.SEVERE, "Failed to parse command line properties", e);
+            logger.log(Level.SEVERE, "Failed to parse command line properties", e);
             help();
         }
 
@@ -87,7 +87,7 @@ public class RequestReceiver {
 
         try {
             socket = new DatagramSocket(SERVER_PORT);
-            log.log(Level.INFO, "Start listening");
+            logger.log(Level.INFO, "Start listening");
             while (true) {
                 // receive request and parse message
                 DatagramPacket requestPacket =
@@ -100,7 +100,7 @@ public class RequestReceiver {
                 serviceRequest.read(deserializer);
                 Character op = serviceRequest.getRequestType();
                 ServiceResponse response;
-                // Check client in log. If not exist, register and log a new client
+                // Check client in logger. If not exist, register and logger a new client
                 Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
                 Boolean registered = checkClient(tempClient);
 

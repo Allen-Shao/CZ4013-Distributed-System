@@ -9,7 +9,6 @@ import bankingsys.server.model.BankAccount;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,7 +30,7 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 public class RequestSender {
 
-    private static final Logger log = Logger.getLogger(RequestSender.class.getName());
+    private static final Logger logger = Logger.getLogger(RequestSender.class.getName());
 
     private DatagramSocket socket = null;
     private byte[] buffer = new byte[BUFFER_SIZE];
@@ -56,7 +55,7 @@ public class RequestSender {
                 switch (commandType) {
                     case "create":
                         if (commandSplits[2].length() != PASSWORD_LENGTH) {
-                            log.log(Level.SEVERE, "Password length must be " + PASSWORD_LENGTH);
+                            logger.log(Level.SEVERE, "Password length must be " + PASSWORD_LENGTH);
                             continue;
                         }
                         request = new ServiceRequest(
@@ -159,7 +158,7 @@ public class RequestSender {
                         startMonitoring();
                     }
                 } else {
-                    log.log(Level.SEVERE, "Command parse error.");
+                    logger.log(Level.SEVERE, "Command parse error.");
                 }
                 requestID++;
             }
@@ -176,11 +175,14 @@ public class RequestSender {
         try {
             Boolean timeout = true;
             while (timeout) {
-                socket.send(packet);
-                DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                 try {
+                    socket.send(packet);
+                    DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                     socket.receive(reply);
                 } catch (SocketTimeoutException e) {
+                    continue;
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Send or receive error on sending request.");
                     continue;
                 }
                 timeout = false;
@@ -189,9 +191,9 @@ public class RequestSender {
             Deserializer deserializer = new Deserializer(buffer);
             ServiceResponse response = new ServiceResponse();
             response.read(deserializer);
-            log.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
+            logger.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
             return response;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -202,20 +204,20 @@ public class RequestSender {
             socket.setSoTimeout(0);
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                
+
                 socket.receive(packet);
 
 
                 Deserializer deserializer = new Deserializer(buffer);
                 ServiceResponse response = new ServiceResponse();
                 response.read(deserializer);
-                log.log(Level.INFO, "Type: " + response.getResponseType());
-                log.log(Level.INFO, "Type: " + response.getResponseMessage());
+                logger.log(Level.INFO, "Type: " + response.getResponseType());
+                logger.log(Level.INFO, "Type: " + response.getResponseMessage());
                 if (response.getResponseType() == 'g') {
                     socket.setSoTimeout(TIMEOUT);
                     return;
                 }
-                log.log(Level.INFO, "Update: Account No. " + response.getResponseAccount() +
+                logger.log(Level.INFO, "Update: Account No. " + response.getResponseAccount() +
                         " now has balance " + response.getResponseAmount());
             }
         } catch (IOException e) {
