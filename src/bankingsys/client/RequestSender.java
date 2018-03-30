@@ -206,13 +206,18 @@ public class RequestSender {
     private ServiceResponse sendRequest(DatagramPacket packet) {
         try {
             Boolean timeout = true;
+            int i = 0;
             while (timeout) {
                 try {
-                    //TODO: simulate sending failure.
+                    if (simulation && i < 3){
+                        i++;
+                        throw new SocketException();
+                    }
                     socket.send(packet);
                     DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                     socket.receive(reply);
                 } catch (SocketTimeoutException e) {
+                    logger.log(Level.SEVERE, "Receive timeout.");
                     continue;
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Send or receive error on sending request.");

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Level;
@@ -114,14 +115,14 @@ public class RequestReceiver {
 
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
-                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), );
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), simulation);
                     //if (op != 'c')
                     //    sendCallbacks(response);
                 } else {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
                     serviceRequest.setRequestPort(requestPacket.getPort());
                     // handle the request
-                    handlerMap.get(op).handleRequest(serviceRequest);
+                    handlerMap.get(op).handleRequest(serviceRequest, simulation);
                 }
             }
         } catch (Exception e) {
@@ -140,23 +141,20 @@ public class RequestReceiver {
         DatagramPacket responsePacket =
                 new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                         address, port);
-        if (simulation){
-            for (int i = 0; i < 5; i++) {
-                if (i==4) {
-                    try {
-                        socket.send(responsePacket);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        Thread.sleep(TIMEOUT+100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+        Random random = new Random();
+        if (simulation && random.nextInt(10)>8){
+            try {
+                throw new SocketException();
+            } catch (SocketException e) {
+                e.printStackTrace();
             }
         }
+        try {
+            socket.send(responsePacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private Boolean checkRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
