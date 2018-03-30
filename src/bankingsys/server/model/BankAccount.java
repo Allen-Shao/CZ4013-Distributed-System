@@ -7,13 +7,14 @@ public class BankAccount {
     private int accountNumber;
     private String name;
     private String password;
-
+    private Currency currencyType;
     private float balance;
 
-    public BankAccount(int accountNumer, String name, String password, float balance) {
-        this.accountNumber = accountNumer;
+    public BankAccount(int accountNumber, String name, String password, Currency currencyType, float balance) {
+        this.accountNumber = accountNumber;
         this.name = name;
         this.password = password;
+        this.currencyType = currencyType;
         this.balance = balance;
     }
 
@@ -21,11 +22,11 @@ public class BankAccount {
         SGD, USD, CNY, JPY, HKD
     }
 
-    public int getAccountNumer() {
+    public int getAccountNumber() {
         return accountNumber;
     }
 
-    public void setAccountNumer(int accountNumber) {
+    public void setAccountNumber(int accountNumber) {
         this.accountNumber = accountNumber;
     }
 
@@ -43,6 +44,14 @@ public class BankAccount {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Currency getCurrencyType() {
+        return currencyType;
+    }
+
+    public void setCurrencyType(Currency currencyType) {
+        this.currencyType = currencyType;
     }
 
     public float getBalance() {
