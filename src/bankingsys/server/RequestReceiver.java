@@ -39,12 +39,15 @@ public class RequestReceiver {
     private static final Logger logger = Logger.getLogger(RequestReceiver.class.getName());
     private static Options options = new Options();
 
+    private static Boolean simulation = false;
+
     public static void main(String[] args) {
         //Arguments Handle
         Boolean atMostOnce = false;
 
         options.addOption("h", "help", false, "Show help.");
         options.addOption("m", "mode", true, "Set mode to 'at-least-once' or 'at-most-once'.");
+        options.addOption("sim", "simulation", false, "Set mode to 'simulation' with error rate.");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -54,6 +57,11 @@ public class RequestReceiver {
 
             if (cmd.hasOption("h"))
                 help();
+
+            if (cmd.hasOption("sim")) {
+                logger.log(Level.INFO, "Using cli argument -sim=" + cmd.getOptionValue("sim"));
+                simulation = true;
+            }
 
             if (cmd.hasOption("mode")) {
                 logger.log(Level.INFO, "Using cli argument -mode=" + cmd.getOptionValue("mode"));
