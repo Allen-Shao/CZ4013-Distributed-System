@@ -15,7 +15,7 @@ import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.MONITOR_PORT;
 import static bankingsys.Constant.SERVER_PORT;
 import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
-
+import static bankingsys.Constant.PASSWORD_LENGTH;
 /**
  * Main class that implements the client
  *
@@ -46,6 +46,9 @@ public class RequestSender {
                 ServiceRequest request = null;
                 switch (commandType) {
                     case "create":
+                        if (commandSplits.length != PASSWORD_LENGTH) {
+                            continue;
+                        }
                         request = new ServiceRequest(
                                 'b',
                                 commandSplits[1],
