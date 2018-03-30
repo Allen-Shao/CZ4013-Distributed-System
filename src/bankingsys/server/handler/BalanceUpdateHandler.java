@@ -7,6 +7,7 @@ import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
 
+import static bankingsys.Constant.BALANCE_UPDATE;
 import static bankingsys.message.ServiceResponse.ResponseStatus.FAILURE;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
@@ -27,7 +28,7 @@ public class BalanceUpdateHandler extends ServiceHandler {
             float currentBalance = account.getBalance();
             if (currentBalance + request.getRequestAmount() >= 0) {
                 account.setBalance(account.getBalance() + request.getRequestAmount());
-                response = new ServiceResponse('e', SUCCESS, account.getAccountNumber(),
+                response = new ServiceResponse(BALANCE_UPDATE, SUCCESS, account.getAccountNumber(),
                         "Account No." + Integer.toString(account.getAccountNumber()) + " belonging to " + account.getName() +
                                 " has a new balance of $" + Float.toString(account.getBalance()),
                         account.getBalance());
@@ -35,11 +36,11 @@ public class BalanceUpdateHandler extends ServiceHandler {
                 server.sendCallbacks(response);
                 return;
             }
-            response = new ServiceResponse('e', FAILURE, null, "Balance is not enough", null);
+            response = new ServiceResponse(BALANCE_UPDATE, FAILURE, null, "Balance is not enough", null);
             server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
             return;
         }
-        response = new ServiceResponse('e', FAILURE, null, "Account doesn't exist", null);
+        response = new ServiceResponse(BALANCE_UPDATE, FAILURE, null, "Account doesn't exist", null);
         server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
     }
 }

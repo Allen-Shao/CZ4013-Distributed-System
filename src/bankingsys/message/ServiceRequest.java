@@ -7,6 +7,8 @@ import bankingsys.server.model.BankAccount.Currency;
 
 import java.net.InetAddress;
 
+import static bankingsys.Constant.*;
+
 /**
  * Object that encapsulates request message
  */
@@ -102,29 +104,29 @@ public class ServiceRequest implements Serializable {
         serializer.writeChar(requestType);
         serializer.writeInt(requestID);
         switch (requestType) {
-            case 'a':
-            case 'd':
+            case ACCOUNT_CREATE:
+            case BALANCE_CHECK:
                 serializer.writeString(requestName);
                 serializer.writeInt(requestAccount);
                 serializer.writeString(requestPassword);
                 break;
-            case 'b':
+            case ACCOUNT_CANCEL:
                 serializer.writeString(requestName);
                 serializer.writeString(requestPassword);
                 serializer.writeFloat(requestAmount);
                 serializer.writeInt(requestCurrency.ordinal());
                 break;
-            case 'c':
+            case ACCOUNT_MONITER:
                 serializer.writeInt(requestDelay);
                 break;
-            case 'e':
+            case BALANCE_UPDATE:
                 serializer.writeString(requestName);
                 serializer.writeInt(requestAccount);
                 serializer.writeString(requestPassword);
                 serializer.writeFloat(requestAmount);
                 serializer.writeInt(requestCurrency.ordinal());
                 break;
-            case 'f':
+            case TRANSFER:
                 serializer.writeString(requestName);
                 serializer.writeInt(requestAccount);
                 serializer.writeString(requestPassword);
@@ -139,29 +141,29 @@ public class ServiceRequest implements Serializable {
         requestType = deserializer.readChar();
         requestID = deserializer.readInt();
         switch (requestType) {
-            case 'a':
-            case 'd':
+            case ACCOUNT_CREATE:
+            case BALANCE_CHECK:
                 requestName = deserializer.readString();
                 requestAccount = deserializer.readInt();
                 requestPassword = deserializer.readString();
                 break;
-            case 'b':
+            case ACCOUNT_CANCEL:
                 requestName = deserializer.readString();
                 requestPassword = deserializer.readString();
                 requestAmount = deserializer.readFloat();
                 requestCurrency = Currency.values()[deserializer.readInt()];
                 break;
-            case 'c':
+            case ACCOUNT_MONITER:
                 requestDelay = deserializer.readInt();
                 break;
-            case 'e':
+            case BALANCE_UPDATE:
                 requestName = deserializer.readString();
                 requestAccount = deserializer.readInt();
                 requestPassword = deserializer.readString();
                 requestAmount = deserializer.readFloat();
                 requestCurrency = Currency.values()[deserializer.readInt()];
                 break;
-            case 'f':
+            case TRANSFER:
                 requestName = deserializer.readString();
                 requestAccount = deserializer.readInt();
                 requestPassword = deserializer.readString();

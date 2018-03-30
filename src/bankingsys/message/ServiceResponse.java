@@ -4,6 +4,8 @@ import bankingsys.io.Deserializer;
 import bankingsys.io.Serializable;
 import bankingsys.io.Serializer;
 
+
+import static bankingsys.Constant.*;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
@@ -58,14 +60,14 @@ public class ServiceResponse implements Serializable {
         serializer.writeChar(responseType);
         serializer.writeInt(responseCode.ordinal());
         switch (responseType) {
-            case 'a':
-            case 'c':
-            case 'g':
+            case ACCOUNT_CREATE:
+            case ACCOUNT_MONITER:
+            case END_MONITER:
                 break;
-            case 'b':
-            case 'd':
-            case 'e':
-            case 'f':
+            case ACCOUNT_CANCEL:
+            case BALANCE_CHECK:
+            case BALANCE_UPDATE:
+            case TRANSFER:
                 if (responseCode == SUCCESS) {
                     serializer.writeInt(responseAccount);
                     serializer.writeFloat(responseAmount);
@@ -80,10 +82,10 @@ public class ServiceResponse implements Serializable {
         responseType = deserializer.readChar();
         responseCode = ResponseStatus.values()[deserializer.readInt()];
         switch (responseType) {
-            case 'b':
-            case 'd':
-            case 'e':
-            case 'f':
+            case ACCOUNT_CANCEL:
+            case BALANCE_CHECK:
+            case BALANCE_UPDATE:
+            case TRANSFER:
                 if (responseCode == SUCCESS) {
                     responseAccount = deserializer.readInt();
                     responseAmount = deserializer.readFloat();

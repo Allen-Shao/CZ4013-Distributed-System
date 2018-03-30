@@ -18,8 +18,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.cli.*;
 
-import static bankingsys.Constant.BUFFER_SIZE;
-import static bankingsys.Constant.SERVER_PORT;
+import static bankingsys.Constant.*;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
@@ -77,12 +76,12 @@ public class RequestReceiver {
 
     private void run(boolean atMostOnce) {
         HashMap<Character, ServiceHandler> handlerMap = new HashMap<>();
-        handlerMap.put('a', new AccountCancellationHandler(accountDatabase, this));
-        handlerMap.put('b', new AccountCreationHandler(accountDatabase, this));
-        handlerMap.put('c', new AccountMonitoringHandler(accountDatabase, this, clients));
-        handlerMap.put('d', new BalanceCheckHandler(accountDatabase, this));
-        handlerMap.put('e', new BalanceUpdateHandler(accountDatabase, this));
-        handlerMap.put('f', new TransferHandler(accountDatabase, this));
+        handlerMap.put(ACCOUNT_CREATE, new AccountCancellationHandler(accountDatabase, this));
+        handlerMap.put(ACCOUNT_CANCEL, new AccountCreationHandler(accountDatabase, this));
+        handlerMap.put(ACCOUNT_MONITER, new AccountMonitoringHandler(accountDatabase, this, clients));
+        handlerMap.put(BALANCE_CHECK, new BalanceCheckHandler(accountDatabase, this));
+        handlerMap.put(BALANCE_UPDATE, new BalanceUpdateHandler(accountDatabase, this));
+        handlerMap.put(TRANSFER, new TransferHandler(accountDatabase, this));
 
 
         try {
@@ -107,7 +106,7 @@ public class RequestReceiver {
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
                     sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
-                    //if (op != 'c')
+                    //if (op != ACCOUNT_MONITER)
                     //    sendCallbacks(response);
                 } else {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
