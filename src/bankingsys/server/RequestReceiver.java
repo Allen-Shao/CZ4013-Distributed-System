@@ -39,10 +39,6 @@ public class RequestReceiver {
 
 
         HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
-//        accountDatabase.put(0, randomAccount(0));
-//        accountDatabase.put(1, randomAccount(1));
-//        accountDatabase.put(2, randomAccount(2));
-//        accountDatabase.put(3, randomAccount(3));
 
         int databaseSize = accountDatabase.size();
 
@@ -80,7 +76,6 @@ public class RequestReceiver {
 
                     }
                 }
-
 
                 deserializer = new Deserializer(receiveBuffer);
                 ServiceRequest serviceRequest = new ServiceRequest();
@@ -132,22 +127,6 @@ public class RequestReceiver {
             System.out.println("Client registered.");
             return false;
         }
-    }
-
-
-    private static BankAccount randomAccount(int accountNumber){
-        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        Random random=new Random();
-        StringBuffer randomName=new StringBuffer();
-        for(int i=0;i<(5+(int)random.nextInt(5));i++){
-            int number=random.nextInt(52);
-            randomName.append(str.charAt(number));
-        }
-        String name = randomName.toString();
-        String password = "123456";
-        BankAccount.Currency currency = BankAccount.Currency.SGD;
-        float balance = (float) 0.0;
-        return new BankAccount(accountNumber, name, password, currency, balance);
     }
 
     private static void sendCallbacks(DatagramSocket socket, HashSet<Client> clients, ServiceResponse response, Serializer serializer) {
