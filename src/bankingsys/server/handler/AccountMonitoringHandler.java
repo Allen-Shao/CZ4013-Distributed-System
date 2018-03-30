@@ -5,12 +5,11 @@ import bankingsys.message.ServiceResponse;
 import bankingsys.server.model.BankAccount;
 import bankingsys.server.model.Client;
 
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static bankingsys.message.ServiceResponse.ResponseType.FAILURE;
-import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+import static bankingsys.message.ServiceResponse.ResponseStatus.FAILURE;
+import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
  * Handler for registering monitoring clients

@@ -10,14 +10,12 @@ import bankingsys.server.model.Client;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Random;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
-import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
  * Main class that implements the server

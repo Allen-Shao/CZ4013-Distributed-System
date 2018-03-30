@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
-import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 import static bankingsys.Constant.PASSWORD_LENGTH;
 /**
  * Main class that implements the client

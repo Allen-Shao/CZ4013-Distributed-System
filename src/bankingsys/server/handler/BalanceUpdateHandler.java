@@ -6,8 +6,8 @@ import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
 
-import static bankingsys.message.ServiceResponse.ResponseType.FAILURE;
-import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+import static bankingsys.message.ServiceResponse.ResponseStatus.FAILURE;
+import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
  * Handler for updating account balance (deposit / withdraw)

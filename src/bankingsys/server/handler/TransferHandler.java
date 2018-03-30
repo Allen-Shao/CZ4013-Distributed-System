@@ -6,8 +6,8 @@ import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
 
-import static bankingsys.message.ServiceResponse.ResponseType.FAILURE;
-import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+import static bankingsys.message.ServiceResponse.ResponseStatus.FAILURE;
+import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
  * Created by koallen on 29/3/18.

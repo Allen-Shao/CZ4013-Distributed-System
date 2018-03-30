@@ -4,35 +4,33 @@ import bankingsys.io.Deserializer;
 import bankingsys.io.Serializable;
 import bankingsys.io.Serializer;
 
-import java.util.Map;
-
-import static bankingsys.message.ServiceResponse.ResponseType.SUCCESS;
+import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
  * Created by koallen on 29/3/18.
  */
 public class ServiceResponse implements Serializable {
 
-    public enum ResponseType {
+    public enum ResponseStatus {
         SUCCESS,
         FAILURE;
     }
 
-    private ResponseType responseCode;
+    private ResponseStatus responseCode;
     private Integer responseAccount;
     private String responseMessage;
     private Float responseAmount;
 
     public ServiceResponse() {}
 
-    public ServiceResponse(ResponseType responseCode, Integer responseAccount, String responseMessage, Float responseAmount) {
+    public ServiceResponse(ResponseStatus responseCode, Integer responseAccount, String responseMessage, Float responseAmount) {
         this.responseCode = responseCode;
         this.responseAccount = responseAccount;
         this.responseMessage = responseMessage;
         this.responseAmount = responseAmount;
     }
 
-    public ResponseType getResponseCode() {
+    public ResponseStatus getResponseCode() {
         return responseCode;
     }
 
@@ -60,7 +58,7 @@ public class ServiceResponse implements Serializable {
 
     @Override
     public void read(Deserializer deserializer) {
-        responseCode = ResponseType.values()[deserializer.readInt()];
+        responseCode = ResponseStatus.values()[deserializer.readInt()];
         if (responseCode == SUCCESS) {
             this.responseAccount = deserializer.readInt();
             this.responseAmount = deserializer.readFloat();
