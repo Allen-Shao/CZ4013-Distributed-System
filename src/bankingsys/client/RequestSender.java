@@ -12,6 +12,9 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.apache.commons.cli.*;
+
 import static bankingsys.Constant.*;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
@@ -31,12 +34,41 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 public class RequestSender {
 
     private static final Logger logger = Logger.getLogger(RequestSender.class.getName());
+    private static Options options = new Options();
+
+    private static Boolean simulation = false;
 
     private DatagramSocket socket = null;
     private byte[] buffer = new byte[BUFFER_SIZE];
     private Integer requestID = 0;
 
     public static void main(String args[]) throws IOException {
+        options.addOption("h", "help", false, "Show help.");
+        options.addOption("sim", "simulation", false, "Set mode to 'simulation' with error rate.");
+        CommandLineParser parser = new DefaultParser();
+
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, args);
+
+            if (cmd.hasOption("h"))
+                help();
+
+            if (cmd.hasOption("sim")) {
+                logger.log(Level.INFO, "Using cli argument -sim=" + cmd.getOptionValue("sim"));
+                // Whatever you want to do with the setting goes here
+                simulation = true;
+            } else {
+                logger.log(Level.SEVERE, "Missing mode option");
+                help();
+            }
+
+        } catch (ParseException e) {
+            logger.log(Level.SEVERE, "Failed to parse command line properties", e);
+            help();
+        }
+
         new RequestSender().run();
     }
 
@@ -224,5 +256,11 @@ public class RequestSender {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void help() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("Main", options);
+        System.exit(0);
     }
 }

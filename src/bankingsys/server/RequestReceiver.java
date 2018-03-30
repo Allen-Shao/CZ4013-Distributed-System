@@ -71,8 +71,6 @@ public class RequestReceiver {
             help();
         }
 
-        System.out.println(atMostOnce);
-
         new RequestReceiver().run(atMostOnce);
     }
 
