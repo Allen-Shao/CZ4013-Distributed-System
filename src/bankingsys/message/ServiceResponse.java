@@ -57,20 +57,34 @@ public class ServiceResponse implements Serializable {
     public void write(Serializer serializer) {
         serializer.writeChar(responseType);
         serializer.writeInt(responseCode.ordinal());
-        if (responseCode == SUCCESS) {
-            serializer.writeInt(this.responseAccount);
-            serializer.writeFloat(this.responseAmount);
+        switch (responseType) {
+            case 'a':
+            case 'c':
+            case 'g':
+                break;
+            case 'b':
+            case 'd':
+            case 'e':
+            case 'f':
+                serializer.writeInt(responseAccount);
+                serializer.writeFloat(responseAmount);
+                break;
         }
-        serializer.writeString(this.responseMessage);
+        serializer.writeString(responseMessage);
     }
 
     @Override
     public void read(Deserializer deserializer) {
         responseType = deserializer.readChar();
         responseCode = ResponseStatus.values()[deserializer.readInt()];
-        if (responseCode == SUCCESS) {
-            this.responseAccount = deserializer.readInt();
-            this.responseAmount = deserializer.readFloat();
+        switch (responseType) {
+            case 'b':
+            case 'd':
+            case 'e':
+            case 'f':
+                responseAccount = deserializer.readInt();
+                responseAmount = deserializer.readFloat();
+                break;
         }
         this.responseMessage = deserializer.readString();
     }
