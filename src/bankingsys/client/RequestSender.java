@@ -84,7 +84,7 @@ public class RequestSender {
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
-                                -Float.parseFloat(commandSplits[5]),
+                                Float.parseFloat(commandSplits[5]),
                                 null,
                                 BankAccount.Currency.valueOf(commandSplits[4]),
                                 null);
@@ -96,7 +96,7 @@ public class RequestSender {
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
-                                Float.parseFloat(commandSplits[5]),
+                                -Float.parseFloat(commandSplits[5]),
                                 null,
                                 BankAccount.Currency.valueOf(commandSplits[4]),
                                 null);
