@@ -21,6 +21,16 @@ public class ServiceRequest implements Serializable {
     private Currency requestCurrency;
     private InetAddress requestAddress;
 
+    public int getRequestPort() {
+        return requestPort;
+    }
+
+    public void setRequestPort(int requestPort) {
+        this.requestPort = requestPort;
+    }
+
+    private int requestPort;
+
     public ServiceRequest() {}
 
     public ServiceRequest(Character requestType, String requestName, Integer requestAccount,
