@@ -20,8 +20,8 @@ public class ServiceRequest implements Serializable {
 
     public ServiceRequest() {}
 
-    public ServiceRequest(Character requestType, String requestName, int requestAccount,
-                          String requestPassword, Float requestAmount, int requestTargetAccount,
+    public ServiceRequest(Character requestType, String requestName, Integer requestAccount,
+                          String requestPassword, Float requestAmount, Integer requestTargetAccount,
                           Currency requestCurrency) {
         this.requestType = requestType;
         this.requestName = requestName;
