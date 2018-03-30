@@ -2,6 +2,7 @@ package bankingsys.server.handler;
 
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.server.RequestReceiver;
 import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
@@ -13,16 +14,22 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
  * Handler for account cancellation
  */
 public class AccountCancellationHandler extends ServiceHandler {
-    public AccountCancellationHandler(HashMap<Integer, BankAccount> accounts) {
-        super(accounts);
+
+    public AccountCancellationHandler(HashMap<Integer, BankAccount> accounts, RequestReceiver server) {
+        super(accounts, server);
     }
 
     @Override
-    public ServiceResponse handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request) {
+        ServiceResponse response;
         if (accounts.containsKey(request.getRequestAccount())) {
             accounts.remove(request.getRequestAccount());
-            return new ServiceResponse('a', SUCCESS, null, "Account closed", null);
+            response = new ServiceResponse('a', SUCCESS, null, "Account closed", null);
+            server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+            server.sendCallbacks(response);
+            return;
         }
-        return new ServiceResponse('a', FAILURE, null, "Account doesn't exist", null);
+        response = new ServiceResponse('a', FAILURE, null, "Account doesn't exist", null);
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
     }
 }

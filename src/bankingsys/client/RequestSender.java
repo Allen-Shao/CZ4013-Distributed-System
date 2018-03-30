@@ -178,13 +178,22 @@ public class RequestSender {
 
     private void startMonitoring() {
         try {
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
-            Deserializer deserializer = new Deserializer(buffer);
-            ServiceResponse response = new ServiceResponse();
-            response.read(deserializer);
-            System.out.println("Update: Account No. " + response.getResponseAccount() +
-                    " now has balance " + response.getResponseAmount());
+            socket.setSoTimeout(0);
+            while (true) {
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+                Deserializer deserializer = new Deserializer(buffer);
+                ServiceResponse response = new ServiceResponse();
+                response.read(deserializer);
+                System.out.println("Type: " + response.getResponseType());
+                System.out.println("Message: " + response.getResponseMessage());
+                if (response.getResponseType() == 'k') {
+                    socket.setSoTimeout(500);
+                    return;
+                }
+                System.out.println("Update: Account No. " + response.getResponseAccount() +
+                        " now has balance " + response.getResponseAmount());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

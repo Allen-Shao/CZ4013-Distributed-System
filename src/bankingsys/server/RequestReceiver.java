@@ -77,12 +77,12 @@ public class RequestReceiver {
 
     public void run(boolean atMostOnce) {
         HashMap<Character, ServiceHandler> handlerMap = new HashMap<>();
-        handlerMap.put('a', new AccountCancellationHandler(accountDatabase));
-        handlerMap.put('b', new AccountCreationHandler(accountDatabase));
-        handlerMap.put('c', new AccountMonitoringHandler(accountDatabase, clients));
-        handlerMap.put('d', new BalanceCheckHandler(accountDatabase));
-        handlerMap.put('e', new BalanceUpdateHandler(accountDatabase));
-        handlerMap.put('f', new TransferHandler(accountDatabase));
+        handlerMap.put('a', new AccountCancellationHandler(accountDatabase, this));
+        handlerMap.put('b', new AccountCreationHandler(accountDatabase, this));
+        handlerMap.put('c', new AccountMonitoringHandler(accountDatabase, this, clients));
+        handlerMap.put('d', new BalanceCheckHandler(accountDatabase, this));
+        handlerMap.put('e', new BalanceUpdateHandler(accountDatabase, this));
+        handlerMap.put('f', new TransferHandler(accountDatabase, this));
 
 
         try {
@@ -106,18 +106,15 @@ public class RequestReceiver {
 
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
+                    //if (op != 'c')
+                    //    sendCallbacks(response);
                 } else {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
                     serviceRequest.setRequestPort(requestPacket.getPort());
                     // handle the request
-                    response = handlerMap.get(op).handleRequest(serviceRequest);
+                    handlerMap.get(op).handleRequest(serviceRequest);
                 }
-
-                sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
-
-                // send callbacks
-                if (op != 'c')
-                    sendCallbacks(response);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -128,8 +125,9 @@ public class RequestReceiver {
         }
     }
 
-    private void sendResponse(ServiceResponse response, InetAddress address, int port) {
+    public void sendResponse(ServiceResponse response, InetAddress address, int port) {
         // send response
+        serializer = new Serializer();
         response.write(serializer);
         DatagramPacket responsePacket =
                 new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
@@ -162,7 +160,7 @@ public class RequestReceiver {
         }
     }
 
-    private void sendCallbacks(ServiceResponse response) {
+    public void sendCallbacks(ServiceResponse response) {
         System.out.println("Sending callbacks");
         if (response.getResponseCode() == SUCCESS) {
             for (Client client : clients.getClients()) {

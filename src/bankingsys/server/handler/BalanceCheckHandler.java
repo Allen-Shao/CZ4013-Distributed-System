@@ -2,6 +2,7 @@ package bankingsys.server.handler;
 
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.server.RequestReceiver;
 import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
@@ -13,21 +14,27 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
  * Handler for checking account balance
  */
 public class BalanceCheckHandler extends ServiceHandler {
-    public BalanceCheckHandler(HashMap<Integer, BankAccount> accounts) {
-        super(accounts);
+
+    public BalanceCheckHandler(HashMap<Integer, BankAccount> accounts, RequestReceiver server) {
+        super(accounts, server);
     }
 
     @Override
-    public ServiceResponse handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request) {
+        ServiceResponse response;
         if (authenticate(request)) {
             if (accounts.containsKey(request.getRequestAccount())) {
                 BankAccount account = accounts.get(request.getRequestAccount());
-                return new ServiceResponse('d', SUCCESS, account.getAccountNumber(),
+                response = new ServiceResponse('d', SUCCESS, account.getAccountNumber(),
                         "Account No." + Integer.toString(account.getAccountNumber()) + " belonging to " + account.getName() +
                         " has a balance of $" + Float.toString(account.getBalance()),
                         account.getBalance());
+                server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+                server.sendCallbacks(response);
+                return;
             }
         }
-        return new ServiceResponse('d', FAILURE, null, "Account doesn't exist", null);
+        response = new ServiceResponse('d', FAILURE, null, "Account doesn't exist", null);
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
     }
 }

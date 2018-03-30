@@ -41,4 +41,9 @@ public class Client {
         buffer.append(clientPort);
         return buffer.toString().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return clientAddress.toString() + ":" + clientPort;
+    }
 }

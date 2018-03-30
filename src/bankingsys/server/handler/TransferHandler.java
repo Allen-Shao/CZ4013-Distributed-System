@@ -2,6 +2,7 @@ package bankingsys.server.handler;
 
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.server.RequestReceiver;
 import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
@@ -10,15 +11,17 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.FAILURE;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
- * Created by koallen on 29/3/18.
+ * Handler for money transfer
  */
 public class TransferHandler extends ServiceHandler {
-    public TransferHandler(HashMap<Integer, BankAccount> accounts) {
-        super(accounts);
+
+    public TransferHandler(HashMap<Integer, BankAccount> accounts, RequestReceiver server) {
+        super(accounts, server);
     }
 
     @Override
-    public ServiceResponse handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request) {
+        ServiceResponse response;
         if (accounts.containsKey(request.getRequestAccount()) &&
                 accounts.containsKey(request.getRequestTargetAccount())) {
             BankAccount sourceAccount = accounts.get(request.getRequestAccount());
@@ -26,15 +29,20 @@ public class TransferHandler extends ServiceHandler {
             if (sourceAccount.getCurrencyType() == targetAccount.getCurrencyType()) {
                 sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
                 targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAccount());
-                return new ServiceResponse('f', SUCCESS, sourceAccount.getAccountNumber(),
+                response = new ServiceResponse('f', SUCCESS, sourceAccount.getAccountNumber(),
                         "Transfered $" + Float.toString(request.getRequestAmount()) +
                                 " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
                                 " to account no." + Integer.toString(targetAccount.getAccountNumber()),
                         sourceAccount.getBalance());
+                server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+                server.sendCallbacks(response);
             } else {
-                return new ServiceResponse('f', FAILURE, null, "Target account currency type does not match.", null);
+                response = new ServiceResponse('f', FAILURE, null, "Target account currency type does not match.", null);
+                server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
             }
+            return;
         }
-        return new ServiceResponse('f', FAILURE, null, "Account does not exist.", null);
+        response = new ServiceResponse('f', FAILURE, null, "Account does not exist.", null);
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
     }
 }

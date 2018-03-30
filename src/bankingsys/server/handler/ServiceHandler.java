@@ -2,6 +2,7 @@ package bankingsys.server.handler;
 
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.server.RequestReceiver;
 import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
@@ -11,11 +12,13 @@ import java.util.HashMap;
  */
 public abstract class ServiceHandler {
     protected HashMap<Integer, BankAccount> accounts;
+    protected RequestReceiver server;
 
-    public ServiceHandler(HashMap<Integer, BankAccount> accounts) {
+    public ServiceHandler(HashMap<Integer, BankAccount> accounts, RequestReceiver server) {
         this.accounts = accounts;
+        this.server = server;
     }
-    public abstract ServiceResponse handleRequest(ServiceRequest request);
+    public abstract void handleRequest(ServiceRequest request);
 
     protected boolean authenticate(ServiceRequest request) {
         if (accounts.containsKey(request.getRequestAccount())) {

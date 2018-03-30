@@ -2,6 +2,7 @@ package bankingsys.server.handler;
 
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.server.RequestReceiver;
 import bankingsys.server.model.BankAccount;
 import bankingsys.server.model.Client;
 import bankingsys.server.model.MonitoringClients;
@@ -20,13 +21,14 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 public class AccountMonitoringHandler extends ServiceHandler {
     private MonitoringClients clients;
 
-    public AccountMonitoringHandler(HashMap<Integer, BankAccount> accounts, MonitoringClients clients) {
-        super(accounts);
+    public AccountMonitoringHandler(HashMap<Integer, BankAccount> accounts, RequestReceiver server, MonitoringClients clients) {
+        super(accounts, server);
         this.clients = clients;
     }
 
     @Override
-    public ServiceResponse handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request) {
+        ServiceResponse response;
         System.out.println("AccountMonitoringHandler called");
         Client client = new Client(request.getRequestAddress(), request.getRequestPort());
         if (!clients.isClientInSet(client)) {
@@ -36,12 +38,17 @@ public class AccountMonitoringHandler extends ServiceHandler {
                 @Override
                 public void run() {
                     clients.removeFromClients(client);
-                    // TODO: send message back to client
+                    ServiceResponse terminateResponse = new ServiceResponse('k',
+                            SUCCESS, 0, "Monitoring terminated", 0.0f);
+                    server.sendResponse(terminateResponse, request.getRequestAddress(), request.getRequestPort());
                     System.out.println("Client removed");
                 }
             }, request.getRequestDelay() * 1000);
-            return new ServiceResponse('c', SUCCESS, 0, "Monitoring callback registered", 0.0f);
+            response = new ServiceResponse('c', SUCCESS, 0, "Monitoring callback registered", 0.0f);
+            server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+            return;
         }
-        return new ServiceResponse('c', FAILURE, null, "Monitoring callback already registered", null);
+        response = new ServiceResponse('c', FAILURE, null, "Monitoring callback already registered", null);
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
     }
 }
