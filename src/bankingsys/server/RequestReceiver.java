@@ -21,6 +21,7 @@ import org.apache.commons.cli.*;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
+import static bankingsys.Constant.TIMEOUT;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
@@ -105,7 +106,7 @@ public class RequestReceiver {
 
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
-                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), false);
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), );
                     //if (op != 'c')
                     //    sendCallbacks(response);
                 } else {
@@ -131,15 +132,22 @@ public class RequestReceiver {
         DatagramPacket responsePacket =
                 new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                         address, port);
-        try {
-            if (simulation){
-                //TODO: failure
-                Random random = new Random();
-                random.nextInt();
+        if (simulation){
+            for (int i = 0; i < 5; i++) {
+                if (i==4) {
+                    try {
+                        socket.send(responsePacket);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        Thread.sleep(TIMEOUT+100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            socket.send(responsePacket);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
