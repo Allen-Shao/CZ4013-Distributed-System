@@ -26,7 +26,11 @@ public class TransferHandler extends ServiceHandler {
             if (sourceAccount.getCurrencyType() == targetAccount.getCurrencyType()) {
                 sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
                 targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAccount());
-                return new ServiceResponse(SUCCESS, sourceAccount.getAccountNumber(), null, sourceAccount.getBalance());
+                return new ServiceResponse(SUCCESS, sourceAccount.getAccountNumber(),
+                        "Transfered $" + Float.toString(request.getRequestAmount()) +
+                                " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
+                                " to account no." + Integer.toString(targetAccount.getAccountNumber()),
+                        sourceAccount.getBalance());
             } else {
                 return new ServiceResponse(FAILURE, null, "Target account currency type does not match.", null);
             }

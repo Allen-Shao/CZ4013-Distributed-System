@@ -24,7 +24,10 @@ public class BalanceUpdateHandler extends ServiceHandler {
             float currentBalance = account.getBalance();
             if (currentBalance + request.getRequestAmount() >= 0) {
                 account.setBalance(account.getBalance() + request.getRequestAmount());
-                return new ServiceResponse(SUCCESS, account.getAccountNumber(), null, account.getBalance());
+                return new ServiceResponse(SUCCESS, account.getAccountNumber(),
+                        "Account No." + Integer.toString(account.getAccountNumber()) + " belonging to " + account.getName() +
+                                " has a new balance of $" + Float.toString(account.getBalance()),
+                        account.getBalance());
             }
             return new ServiceResponse(FAILURE, null, "Balance is not enough", null);
         }
