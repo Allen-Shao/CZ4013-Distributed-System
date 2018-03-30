@@ -60,7 +60,7 @@ public class RequestSender {
                         }
                         request = new ServiceRequest(
                                 requestID,
-                                'b',
+                                ACCOUNT_CANCEL,
                                 commandSplits[1],
                                 null,
                                 commandSplits[2],
@@ -72,7 +72,7 @@ public class RequestSender {
                     case "close":
                         request = new ServiceRequest(
                                 requestID,
-                                'a',
+                                ACCOUNT_CREATE,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -84,7 +84,7 @@ public class RequestSender {
                     case "deposit":
                         request = new ServiceRequest(
                                 requestID,
-                                'e',
+                                BALANCE_UPDATE,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -96,7 +96,7 @@ public class RequestSender {
                     case "withdraw":
                         request = new ServiceRequest(
                                 requestID,
-                                'e',
+                                BALANCE_UPDATE,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -108,7 +108,7 @@ public class RequestSender {
                     case "monitor":
                         request = new ServiceRequest(
                                 requestID,
-                                'c',
+                                ACCOUNT_MONITER,
                                 null,
                                 null,
                                 null,
@@ -120,7 +120,7 @@ public class RequestSender {
                     case "check":
                         request = new ServiceRequest(
                                 requestID,
-                                'd',
+                                BALANCE_CHECK,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -132,7 +132,7 @@ public class RequestSender {
                     case "transfer":
                         request = new ServiceRequest(
                                 requestID,
-                                'f',
+                                TRANSFER,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -154,7 +154,7 @@ public class RequestSender {
                             address, SERVER_PORT);
 
                     ServiceResponse response = sendRequest(packet);
-                    if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
+                    if (request.getRequestType() == ACCOUNT_MONITER && response.getResponseCode() == SUCCESS) {
                         startMonitoring();
                     }
                 } else {
@@ -214,7 +214,7 @@ public class RequestSender {
                 response.read(deserializer);
                 logger.log(Level.INFO, "Type: " + response.getResponseType());
                 logger.log(Level.INFO, "Type: " + response.getResponseMessage());
-                if (response.getResponseType() == 'g') {
+                if (response.getResponseType() == END_MONITER) {
                     socket.setSoTimeout(TIMEOUT);
                     return;
                 }
