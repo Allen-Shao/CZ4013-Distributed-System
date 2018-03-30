@@ -137,6 +137,7 @@ public class RequestSender {
                     ServiceResponse response = new ServiceResponse();
                     response.read(deserializer);
                     System.out.println(response.getResponseCode());
+                    System.out.println(response.getResponseMessage());
 
                     if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
                         startMonitoring();
