@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static bankingsys.Constant.ACCOUNT_MONITER;
+import static bankingsys.Constant.END_MONITER;
 import static bankingsys.message.ServiceResponse.ResponseStatus.FAILURE;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
@@ -21,13 +23,14 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 public class AccountMonitoringHandler extends ServiceHandler {
     private MonitoringClients clients;
 
-    public AccountMonitoringHandler(HashMap<Integer, BankAccount> accounts, RequestReceiver server, MonitoringClients clients) {
+    public AccountMonitoringHandler(HashMap<Integer, BankAccount> accounts,
+                                    RequestReceiver server, MonitoringClients clients) {
         super(accounts, server);
         this.clients = clients;
     }
 
     @Override
-    public void handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
         System.out.println("AccountMonitoringHandler called");
         Client client = new Client(request.getRequestAddress(), request.getRequestPort());
@@ -38,17 +41,14 @@ public class AccountMonitoringHandler extends ServiceHandler {
                 @Override
                 public void run() {
                     clients.removeFromClients(client);
-                    //ServiceResponse terminateResponse = new ServiceResponse('k',
-                    //        SUCCESS, null, "Monitoring terminated", null);
-                    //server.sendResponse(terminateResponse, request.getRequestAddress(), request.getRequestPort());
                     System.out.println("Client removed");
                 }
             }, request.getRequestDelay() * 1000);
-            response = new ServiceResponse('c', SUCCESS, null, "Monitoring callback registered", null);
-            server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+            response = new ServiceResponse(ACCOUNT_MONITER, SUCCESS, null, "Monitoring callback registered", null);
+            server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
             return;
         }
-        response = new ServiceResponse('c', FAILURE, null, "Monitoring callback already registered", null);
-        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+        response = new ServiceResponse(ACCOUNT_MONITER, FAILURE, null, "Monitoring callback already registered", null);
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
     }
 }

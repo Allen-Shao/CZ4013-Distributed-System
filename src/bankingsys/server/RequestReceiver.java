@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +22,7 @@ import org.apache.commons.cli.*;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
+import static bankingsys.Constant.TIMEOUT;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
@@ -36,8 +39,10 @@ public class RequestReceiver {
     private Serializer serializer = null;
     private byte[] receiveBuffer = new byte[BUFFER_SIZE];
 
-    private static final Logger log = Logger.getLogger(RequestReceiver.class.getName());
+    private static final Logger logger = Logger.getLogger(RequestReceiver.class.getName());
     private static Options options = new Options();
+
+    private static Boolean simulation = false;
 
     public static void main(String[] args) {
         //Arguments Handle
@@ -45,6 +50,7 @@ public class RequestReceiver {
 
         options.addOption("h", "help", false, "Show help.");
         options.addOption("m", "mode", true, "Set mode to 'at-least-once' or 'at-most-once'.");
+        options.addOption("sim", "simulation", false, "Set mode to 'simulation' with error rate.");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -55,22 +61,25 @@ public class RequestReceiver {
             if (cmd.hasOption("h"))
                 help();
 
+            if (cmd.hasOption("sim")) {
+                logger.log(Level.INFO, "Using cli argument -sim=" + cmd.getOptionValue("sim"));
+                simulation = true;
+            }
+
             if (cmd.hasOption("mode")) {
-                log.log(Level.INFO, "Using cli argument -mode=" + cmd.getOptionValue("mode"));
+                logger.log(Level.INFO, "Using cli argument -mode=" + cmd.getOptionValue("mode"));
                 // Whatever you want to do with the setting goes here
                 if (cmd.getOptionValue("mode").equals("at-most-once"))
                     atMostOnce = true;
             } else {
-                log.log(Level.SEVERE, "Missing mode option");
+                logger.log(Level.SEVERE, "Missing mode option");
                 help();
             }
 
         } catch (ParseException e) {
-            log.log(Level.SEVERE, "Failed to parse command line properties", e);
+            logger.log(Level.SEVERE, "Failed to parse command line properties", e);
             help();
         }
-
-        System.out.println(atMostOnce);
 
         new RequestReceiver().run(atMostOnce);
     }
@@ -87,7 +96,7 @@ public class RequestReceiver {
 
         try {
             socket = new DatagramSocket(SERVER_PORT);
-            log.log(Level.INFO, "Start listening");
+            logger.log(Level.INFO, "Start listening");
             while (true) {
                 // receive request and parse message
                 DatagramPacket requestPacket =
@@ -100,20 +109,20 @@ public class RequestReceiver {
                 serviceRequest.read(deserializer);
                 Character op = serviceRequest.getRequestType();
                 ServiceResponse response;
-                // Check client in log. If not exist, register and log a new client
+                // Check client in logger. If not exist, register and logger a new client
                 Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
                 Boolean registered = checkClient(tempClient);
 
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
-                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), simulation);
                     //if (op != 'c')
                     //    sendCallbacks(response);
                 } else {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
                     serviceRequest.setRequestPort(requestPacket.getPort());
                     // handle the request
-                    handlerMap.get(op).handleRequest(serviceRequest);
+                    handlerMap.get(op).handleRequest(serviceRequest, simulation);
                 }
             }
         } catch (Exception e) {
@@ -125,18 +134,27 @@ public class RequestReceiver {
         }
     }
 
-    public void sendResponse(ServiceResponse response, InetAddress address, int port) {
+    public void sendResponse(ServiceResponse response, InetAddress address, int port, boolean simulation) {
         // send response
         serializer = new Serializer();
         response.write(serializer);
         DatagramPacket responsePacket =
                 new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                         address, port);
+        Random random = new Random();
+        if (simulation && random.nextInt(10)>8){
+            try {
+                throw new SocketException();
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+        }
         try {
             socket.send(responsePacket);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     private Boolean checkRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {

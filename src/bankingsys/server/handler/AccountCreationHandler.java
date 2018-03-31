@@ -7,6 +7,7 @@ import bankingsys.server.model.BankAccount;
 
 import java.util.HashMap;
 
+import static bankingsys.Constant.ACCOUNT_CANCEL;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
@@ -21,17 +22,17 @@ public class AccountCreationHandler extends ServiceHandler {
 
 
     @Override
-    public void handleRequest(ServiceRequest request) {
+    public void handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
         BankAccount newAccount = new BankAccount(currentId, request.getRequestName(),
                 request.getRequestPassword(), request.getRequestCurrency(), request.getRequestAmount());
         accounts.put(newAccount.getAccountNumber(), newAccount);
         ++currentId;
-        response = new ServiceResponse('b', SUCCESS, newAccount.getAccountNumber(),
+        response = new ServiceResponse(ACCOUNT_CANCEL, SUCCESS, newAccount.getAccountNumber(),
                 "Account No." + Integer.toString(newAccount.getAccountNumber()) + " belonging to " + newAccount.getName() +
                         " has been created with initial balance $" + Float.toString(newAccount.getBalance()),
                 newAccount.getBalance());
-        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort());
+        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
         server.sendCallbacks(response);
     }
 }

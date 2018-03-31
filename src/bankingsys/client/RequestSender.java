@@ -14,10 +14,12 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static bankingsys.Constant.BUFFER_SIZE;
-import static bankingsys.Constant.SERVER_PORT;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.apache.commons.cli.*;
+
+import static bankingsys.Constant.*;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
-import static bankingsys.Constant.PASSWORD_LENGTH;
+
 /**
  * Main class that implements the client
  *
@@ -33,7 +35,10 @@ import static bankingsys.Constant.PASSWORD_LENGTH;
 
 public class RequestSender {
 
-    private static final Logger log = Logger.getLogger(RequestSender.class.getName());
+    private static final Logger logger = Logger.getLogger(RequestSender.class.getName());
+    private static Options options = new Options();
+
+    private static Boolean simulation = false;
 
     private int clientPort;
     private DatagramSocket socket = null;
@@ -41,6 +46,32 @@ public class RequestSender {
     private Integer requestID = 0;
 
     public static void main(String args[]) throws IOException {
+        options.addOption("h", "help", false, "Show help.");
+        options.addOption("sim", "simulation", false, "Set mode to 'simulation' with error rate.");
+        CommandLineParser parser = new DefaultParser();
+
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, args);
+
+            if (cmd.hasOption("h"))
+                help();
+
+            if (cmd.hasOption("sim")) {
+                logger.log(Level.INFO, "Using cli argument -sim=" + cmd.getOptionValue("sim"));
+                // Whatever you want to do with the setting goes here
+                simulation = true;
+            } else {
+                logger.log(Level.SEVERE, "Missing mode option");
+                help();
+            }
+
+        } catch (ParseException e) {
+            logger.log(Level.SEVERE, "Failed to parse command line properties", e);
+            help();
+        }
+
         new RequestSender().run();
     }
 
@@ -48,7 +79,7 @@ public class RequestSender {
         try {
             socket = new DatagramSocket();
             clientPort = socket.getLocalPort();
-            socket.setSoTimeout(200);
+            socket.setSoTimeout(TIMEOUT);
             Scanner sc = new Scanner(System.in);
             while (true) {
                 System.out.print(">>> ");
@@ -60,12 +91,12 @@ public class RequestSender {
                 switch (commandType) {
                     case "create":
                         if (commandSplits[2].length() != PASSWORD_LENGTH) {
-                            log.log(Level.SEVERE, "Password length must be " + PASSWORD_LENGTH);
+                            logger.log(Level.SEVERE, "Password length must be " + PASSWORD_LENGTH);
                             continue;
                         }
                         request = new ServiceRequest(
                                 requestID,
-                                'b',
+                                ACCOUNT_CANCEL,
                                 commandSplits[1],
                                 null,
                                 commandSplits[2],
@@ -77,7 +108,7 @@ public class RequestSender {
                     case "close":
                         request = new ServiceRequest(
                                 requestID,
-                                'a',
+                                ACCOUNT_CREATE,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -89,7 +120,7 @@ public class RequestSender {
                     case "deposit":
                         request = new ServiceRequest(
                                 requestID,
-                                'e',
+                                BALANCE_UPDATE,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -101,7 +132,7 @@ public class RequestSender {
                     case "withdraw":
                         request = new ServiceRequest(
                                 requestID,
-                                'e',
+                                BALANCE_UPDATE,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -113,7 +144,7 @@ public class RequestSender {
                     case "monitor":
                         request = new ServiceRequest(
                                 requestID,
-                                'c',
+                                ACCOUNT_MONITER,
                                 null,
                                 null,
                                 null,
@@ -125,7 +156,7 @@ public class RequestSender {
                     case "check":
                         request = new ServiceRequest(
                                 requestID,
-                                'd',
+                                BALANCE_CHECK,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -137,7 +168,7 @@ public class RequestSender {
                     case "transfer":
                         request = new ServiceRequest(
                                 requestID,
-                                'f',
+                                TRANSFER,
                                 commandSplits[1],
                                 Integer.parseInt(commandSplits[2]),
                                 commandSplits[3],
@@ -157,20 +188,13 @@ public class RequestSender {
                     InetAddress address = InetAddress.getByName("localhost");
                     DatagramPacket packet = new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                             address, SERVER_PORT);
-                    socket.send(packet);
 
-                    DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(reply);
-                    Deserializer deserializer = new Deserializer(buffer);
-                    ServiceResponse response = new ServiceResponse();
-                    response.read(deserializer);
-                    log.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
-
-                    if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
+                    ServiceResponse response = sendRequest(packet);
+                    if (request.getRequestType() == ACCOUNT_MONITER && response.getResponseCode() == SUCCESS) {
                         startMonitoring(Integer.parseInt(commandSplits[1]));
                     }
                 } else {
-                    log.log(Level.SEVERE, "Command parse error.");
+                    logger.log(Level.SEVERE, "Command parse error.");
                 }
                 requestID++;
             }
@@ -181,6 +205,40 @@ public class RequestSender {
                 socket.close();
             }
         }
+    }
+
+    private ServiceResponse sendRequest(DatagramPacket packet) {
+        try {
+            Boolean timeout = true;
+            int i = 0;
+            while (timeout) {
+                try {
+                    if (simulation && i < 3){
+                        i++;
+                        throw new SocketException();
+                    }
+                    socket.send(packet);
+                    DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(reply);
+                } catch (SocketTimeoutException e) {
+                    logger.log(Level.SEVERE, "Receive timeout.");
+                    continue;
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Send or receive error on sending request.");
+                    continue;
+                }
+                timeout = false;
+            }
+
+            Deserializer deserializer = new Deserializer(buffer);
+            ServiceResponse response = new ServiceResponse();
+            response.read(deserializer);
+            logger.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
+            return response;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void startMonitoring(int duration) {
@@ -203,21 +261,30 @@ public class RequestSender {
             socket.setSoTimeout(0);
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
                 socket.receive(packet);
+
+
                 Deserializer deserializer = new Deserializer(buffer);
                 ServiceResponse response = new ServiceResponse();
                 response.read(deserializer);
-                log.log(Level.INFO, "Type: " + response.getResponseType());
-                log.log(Level.INFO, "Type: " + response.getResponseMessage());
-                if (response.getResponseType() == 'k') {
-                    socket.setSoTimeout(500);
+                logger.log(Level.INFO, "Type: " + response.getResponseType());
+                logger.log(Level.INFO, "Type: " + response.getResponseMessage());
+                if (response.getResponseType() == END_MONITER) {
+                    socket.setSoTimeout(TIMEOUT);
                     return;
                 }
-                log.log(Level.INFO, "Update: Account No. " + response.getResponseAccount() +
+                logger.log(Level.INFO, "Update: Account No. " + response.getResponseAccount() +
                         " now has balance " + response.getResponseAmount());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void help() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("Main", options);
+        System.exit(0);
     }
 }
