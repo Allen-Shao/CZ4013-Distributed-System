@@ -9,6 +9,8 @@ import bankingsys.server.model.BankAccount;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +35,7 @@ public class RequestSender {
 
     private static final Logger log = Logger.getLogger(RequestSender.class.getName());
 
+    private int clientPort;
     private DatagramSocket socket = null;
     private byte[] buffer = new byte[BUFFER_SIZE];
     private Integer requestID = 0;
@@ -44,6 +47,7 @@ public class RequestSender {
     private void run() {
         try {
             socket = new DatagramSocket();
+            clientPort = socket.getLocalPort();
             socket.setSoTimeout(200);
             Scanner sc = new Scanner(System.in);
             while (true) {
@@ -163,7 +167,7 @@ public class RequestSender {
                     log.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
 
                     if (request.getRequestType() == 'c' && response.getResponseCode() == SUCCESS) {
-                        startMonitoring();
+                        startMonitoring(Integer.parseInt(commandSplits[1]));
                     }
                 } else {
                     log.log(Level.SEVERE, "Command parse error.");
@@ -179,8 +183,23 @@ public class RequestSender {
         }
     }
 
-    private void startMonitoring() {
+    private void startMonitoring(int duration) {
         try {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        DatagramSocket socket = new DatagramSocket();
+                        //ServiceResponse response = new ServiceResponse()
+                        //DatagramPacket packet = new DatagramPacket()
+                        //socket.send();
+                    } catch (SocketException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, duration * 1000);
             socket.setSoTimeout(0);
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
