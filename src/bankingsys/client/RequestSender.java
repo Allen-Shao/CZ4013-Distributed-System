@@ -14,7 +14,6 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.cli.*;
 
 import static bankingsys.Constant.*;
@@ -62,9 +61,6 @@ public class RequestSender {
                 logger.log(Level.INFO, "Using cli argument -sim=" + cmd.getOptionValue("sim"));
                 // Whatever you want to do with the setting goes here
                 simulation = true;
-            } else {
-                logger.log(Level.SEVERE, "Missing mode option");
-                help();
             }
 
         } catch (ParseException e) {
@@ -249,10 +245,15 @@ public class RequestSender {
                 public void run() {
                     try {
                         DatagramSocket socket = new DatagramSocket();
-                        //ServiceResponse response = new ServiceResponse()
-                        //DatagramPacket packet = new DatagramPacket()
-                        //socket.send();
-                    } catch (SocketException e) {
+                        ServiceResponse response = new ServiceResponse(END_MONITER, SUCCESS,
+                                null, "Monitoring finished", null);
+                        Serializer serializer = new Serializer();
+                        response.write(serializer);
+                        InetAddress address = InetAddress.getByName("localhost");
+                        DatagramPacket packet = new DatagramPacket(serializer.getBuffer(),
+                                serializer.getBufferLength(), address, clientPort);
+                        socket.send(packet);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -274,7 +275,7 @@ public class RequestSender {
                     socket.setSoTimeout(TIMEOUT);
                     return;
                 }
-                logger.log(Level.INFO, "Update: Account No. " + response.getResponseAccount() +
+                System.out.println("Update: Account No. " + response.getResponseAccount() +
                         " now has balance " + response.getResponseAmount());
             }
         } catch (IOException e) {
