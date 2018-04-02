@@ -4,6 +4,7 @@ import bankingsys.io.Deserializer;
 import bankingsys.io.Serializer;
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.net.UnreliableDatagramSocket;
 import bankingsys.server.model.BankAccount;
 
 import java.io.IOException;
@@ -73,7 +74,11 @@ public class RequestSender {
 
     private void run() {
         try {
-            socket = new DatagramSocket();
+            if (simulation) {
+                socket = new UnreliableDatagramSocket();
+            } else {
+                socket = new DatagramSocket();
+            }
             clientPort = socket.getLocalPort();
             socket.setSoTimeout(TIMEOUT);
             Scanner sc = new Scanner(System.in);
