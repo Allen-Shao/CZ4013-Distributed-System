@@ -21,7 +21,7 @@ public class TransferHandler extends ServiceHandler {
     }
 
     @Override
-    public void handleRequest(ServiceRequest request, boolean simulation) {
+    public ServiceResponse handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
         if (accounts.containsKey(request.getRequestAccount()) &&
                 accounts.containsKey(request.getRequestTargetAccount())) {
@@ -36,19 +36,15 @@ public class TransferHandler extends ServiceHandler {
                                     " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
                                     " to account no." + Integer.toString(targetAccount.getAccountNumber()),
                             sourceAccount.getBalance());
-                    server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
-                    server.sendCallbacks(response);
-                } else {response = new ServiceResponse(TRANSFER, FAILURE, null, "No enough balance.", null);
-                    server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
+                } else {
+                    response = new ServiceResponse(TRANSFER, FAILURE, null, "No enough balance.", null);
                 }
 
             } else {
                 response = new ServiceResponse(TRANSFER, FAILURE, null, "Target account currency type does not match.", null);
-                server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
             }
-            return;
         }
         response = new ServiceResponse(TRANSFER, FAILURE, null, "Account does not exist.", null);
-        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
+        return response;
     }
 }

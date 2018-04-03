@@ -21,7 +21,7 @@ public class BalanceCheckHandler extends ServiceHandler {
     }
 
     @Override
-    public void handleRequest(ServiceRequest request, boolean simulation) {
+    public ServiceResponse handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
         if (authenticate(request)) {
             if (accounts.containsKey(request.getRequestAccount())) {
@@ -30,12 +30,9 @@ public class BalanceCheckHandler extends ServiceHandler {
                         "Account No." + Integer.toString(account.getAccountNumber()) + " belonging to " + account.getName() +
                         " has a balance of $" + Float.toString(account.getBalance()),
                         account.getBalance());
-                server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
-                server.sendCallbacks(response);
-                return;
             }
         }
         response = new ServiceResponse(BALANCE_CHECK, FAILURE, null, "Account doesn't exist", null);
-        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
+        return response;
     }
 }

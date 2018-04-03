@@ -30,7 +30,7 @@ public class AccountMonitoringHandler extends ServiceHandler {
     }
 
     @Override
-    public void handleRequest(ServiceRequest request, boolean simulation) {
+    public ServiceResponse handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
         System.out.println("AccountMonitoringHandler called");
         Client client = new Client(request.getRequestAddress(), request.getRequestPort());
@@ -45,10 +45,8 @@ public class AccountMonitoringHandler extends ServiceHandler {
                 }
             }, request.getRequestDelay() * 1000);
             response = new ServiceResponse(ACCOUNT_MONITER, SUCCESS, null, "Monitoring callback registered", null);
-            server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
-            return;
         }
         response = new ServiceResponse(ACCOUNT_MONITER, FAILURE, null, "Monitoring callback already registered", null);
-        server.sendResponse(response, request.getRequestAddress(), request.getRequestPort(), simulation);
+        return response;
     }
 }

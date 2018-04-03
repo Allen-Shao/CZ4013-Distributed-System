@@ -3,6 +3,7 @@ import bankingsys.io.Deserializer;
 import bankingsys.io.Serializer;
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.net.UnreliableDatagramSocket;
 import bankingsys.server.handler.*;
 import bankingsys.server.model.BankAccount;
 import bankingsys.server.model.Client;
@@ -95,7 +96,11 @@ public class RequestReceiver {
 
 
         try {
-            socket = new DatagramSocket(SERVER_PORT);
+            if (simulation) {
+                socket = new UnreliableDatagramSocket(SERVER_PORT);
+            } else {
+                socket = new DatagramSocket(SERVER_PORT);
+            }
             logger.log(Level.INFO, "Start listening");
             while (true) {
                 // receive request and parse message
@@ -122,7 +127,9 @@ public class RequestReceiver {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
                     serviceRequest.setRequestPort(requestPacket.getPort());
                     // handle the request
-                    handlerMap.get(op).handleRequest(serviceRequest, simulation);
+                    response = handlerMap.get(op).handleRequest(serviceRequest, simulation);
+                    clientsLog.get(tempClient).put(serviceRequest.getRequestID(), response);
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), simulation);
                 }
             }
         } catch (Exception e) {
@@ -134,27 +141,18 @@ public class RequestReceiver {
         }
     }
 
-    public void sendResponse(ServiceResponse response, InetAddress address, int port, boolean simulation) {
+    private void sendResponse(ServiceResponse response, InetAddress address, int port, boolean simulation) {
         // send response
         serializer = new Serializer();
         response.write(serializer);
         DatagramPacket responsePacket =
                 new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                         address, port);
-        Random random = new Random();
-        if (simulation && random.nextInt(10)>8){
-            try {
-                throw new SocketException();
-            } catch (SocketException e) {
-                e.printStackTrace();
-            }
-        }
         try {
             socket.send(responsePacket);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "failure on sending reply");
         }
-
     }
 
     private Boolean checkRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
@@ -172,7 +170,7 @@ public class RequestReceiver {
             System.out.println("Client exists.");
             return true;
         } else {
-            clientsLog.put(client,new HashMap<Integer, ServiceResponse>());
+            clientsLog.put(client,new HashMap<>());
             System.out.println("Client registered.");
             return false;
         }

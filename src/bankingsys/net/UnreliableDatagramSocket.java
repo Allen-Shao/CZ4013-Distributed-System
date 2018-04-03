@@ -5,11 +5,15 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Custom socket class for simulating random failures
  */
 public class UnreliableDatagramSocket extends DatagramSocket {
+
+    private static final Logger logger = Logger.getLogger(UnreliableDatagramSocket.class.getName());
     private float failureProbability = 0.5f;
     private Random randomGenerator = new Random();
 
@@ -27,6 +31,7 @@ public class UnreliableDatagramSocket extends DatagramSocket {
         if (failure > failureProbability) {
             super.send(packet);
         } else {
+            logger.log(Level.WARNING, "Simulated failure");
             throw new IOException("Simulated failure");
         }
     }

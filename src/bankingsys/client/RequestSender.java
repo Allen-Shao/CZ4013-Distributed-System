@@ -4,6 +4,7 @@ import bankingsys.io.Deserializer;
 import bankingsys.io.Serializer;
 import bankingsys.message.ServiceRequest;
 import bankingsys.message.ServiceResponse;
+import bankingsys.net.SocketHelper;
 import bankingsys.net.UnreliableDatagramSocket;
 import bankingsys.server.model.BankAccount;
 
@@ -209,28 +210,9 @@ public class RequestSender {
     }
 
     private ServiceResponse sendRequest(DatagramPacket packet) {
+        DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
         try {
-            Boolean timeout = true;
-            int i = 0;
-            while (timeout) {
-                try {
-                    if (simulation && i < 3){
-                        i++;
-                        throw new SocketException();
-                    }
-                    socket.send(packet);
-                    DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(reply);
-                } catch (SocketTimeoutException e) {
-                    logger.log(Level.SEVERE, "Receive timeout.");
-                    continue;
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Send or receive error on sending request.");
-                    continue;
-                }
-                timeout = false;
-            }
-
+            SocketHelper.sendReliably(socket, packet, reply);
             Deserializer deserializer = new Deserializer(buffer);
             ServiceResponse response = new ServiceResponse();
             response.read(deserializer);

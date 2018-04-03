@@ -18,7 +18,7 @@ public abstract class ServiceHandler {
         this.accounts = accounts;
         this.server = server;
     }
-    public abstract void handleRequest(ServiceRequest request, boolean simulation);
+    public abstract ServiceResponse handleRequest(ServiceRequest request, boolean simulation);
 
     protected boolean authenticate(ServiceRequest request) {
         if (accounts.containsKey(request.getRequestAccount())) {
