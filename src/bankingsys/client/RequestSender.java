@@ -92,123 +92,128 @@ public class RequestSender {
             clientPort = socket.getLocalPort();
             socket.setSoTimeout(TIMEOUT);
             Scanner sc = new Scanner(System.in);
-            System.out.print(">>> ");
             while (true) {
-                String command = sc.nextLine();
-                String[] commandSplits = command.split(" ");
-                String commandType = commandSplits[0];
+                try {
+                    System.out.print(">>> ");
+                    String command = sc.nextLine();
+                    String[] commandSplits = command.split(" ");
+                    String commandType = commandSplits[0];
 
-                ServiceRequest request = null;
-                switch (commandType) {
-                    case "create":
-                        if (commandSplits[2].length() != PASSWORD_LENGTH) {
-                            logger.log(Level.SEVERE, "Password length must be " + PASSWORD_LENGTH);
-                            continue;
-                        }
-                        request = new ServiceRequest(
-                                requestID,
-                                ACCOUNT_CANCEL,
-                                commandSplits[1],
-                                null,
-                                commandSplits[2],
-                                Float.parseFloat(commandSplits[4]),
-                                null,
-                                BankAccount.Currency.valueOf(commandSplits[3]),
-                                null);
-                        break;
-                    case "close":
-                        request = new ServiceRequest(
-                                requestID,
-                                ACCOUNT_CREATE,
-                                commandSplits[1],
-                                Integer.parseInt(commandSplits[2]),
-                                commandSplits[3],
-                                null,
-                                null,
-                                null,
-                                null);
-                        break;
-                    case "deposit":
-                        request = new ServiceRequest(
-                                requestID,
-                                BALANCE_UPDATE,
-                                commandSplits[1],
-                                Integer.parseInt(commandSplits[2]),
-                                commandSplits[3],
-                                Float.parseFloat(commandSplits[5]),
-                                null,
-                                BankAccount.Currency.valueOf(commandSplits[4]),
-                                null);
-                        break;
-                    case "withdraw":
-                        request = new ServiceRequest(
-                                requestID,
-                                BALANCE_UPDATE,
-                                commandSplits[1],
-                                Integer.parseInt(commandSplits[2]),
-                                commandSplits[3],
-                                -Float.parseFloat(commandSplits[5]),
-                                null,
-                                BankAccount.Currency.valueOf(commandSplits[4]),
-                                null);
-                        break;
-                    case "monitor":
-                        request = new ServiceRequest(
-                                requestID,
-                                ACCOUNT_MONITOR,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                Integer.parseInt(commandSplits[1]));
-                        break;
-                    case "check":
-                        request = new ServiceRequest(
-                                requestID,
-                                BALANCE_CHECK,
-                                commandSplits[1],
-                                Integer.parseInt(commandSplits[2]),
-                                commandSplits[3],
-                                null,
-                                null,
-                                null,
-                                null);
-                        break;
-                    case "transfer":
-                        request = new ServiceRequest(
-                                requestID,
-                                TRANSFER,
-                                commandSplits[1],
-                                Integer.parseInt(commandSplits[2]),
-                                commandSplits[3],
-                                Float.parseFloat(commandSplits[5]),
-                                Integer.parseInt(commandSplits[4]),
-                                null,
-                                null);
-                        break;
-                    case "exit":
-                        return;
+                    ServiceRequest request = null;
+                    switch (commandType) {
+                        case "create":
+                            if (commandSplits[2].length() != PASSWORD_LENGTH) {
+                                logger.log(Level.SEVERE, "Password length must be " + PASSWORD_LENGTH);
+                                continue;
+                            }
+                            request = new ServiceRequest(
+                                    requestID,
+                                    ACCOUNT_CANCEL,
+                                    commandSplits[1],
+                                    null,
+                                    commandSplits[2],
+                                    Float.parseFloat(commandSplits[4]),
+                                    null,
+                                    BankAccount.Currency.valueOf(commandSplits[3]),
+                                    null);
+                            break;
+                        case "close":
+                            request = new ServiceRequest(
+                                    requestID,
+                                    ACCOUNT_CREATE,
+                                    commandSplits[1],
+                                    Integer.parseInt(commandSplits[2]),
+                                    commandSplits[3],
+                                    null,
+                                    null,
+                                    null,
+                                    null);
+                            break;
+                        case "deposit":
+                            request = new ServiceRequest(
+                                    requestID,
+                                    BALANCE_UPDATE,
+                                    commandSplits[1],
+                                    Integer.parseInt(commandSplits[2]),
+                                    commandSplits[3],
+                                    Float.parseFloat(commandSplits[5]),
+                                    null,
+                                    BankAccount.Currency.valueOf(commandSplits[4]),
+                                    null);
+                            break;
+                        case "withdraw":
+                            request = new ServiceRequest(
+                                    requestID,
+                                    BALANCE_UPDATE,
+                                    commandSplits[1],
+                                    Integer.parseInt(commandSplits[2]),
+                                    commandSplits[3],
+                                    -Float.parseFloat(commandSplits[5]),
+                                    null,
+                                    BankAccount.Currency.valueOf(commandSplits[4]),
+                                    null);
+                            break;
+                        case "monitor":
+                            request = new ServiceRequest(
+                                    requestID,
+                                    ACCOUNT_MONITOR,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    Integer.parseInt(commandSplits[1]));
+                            break;
+                        case "check":
+                            request = new ServiceRequest(
+                                    requestID,
+                                    BALANCE_CHECK,
+                                    commandSplits[1],
+                                    Integer.parseInt(commandSplits[2]),
+                                    commandSplits[3],
+                                    null,
+                                    null,
+                                    null,
+                                    null);
+                            break;
+                        case "transfer":
+                            request = new ServiceRequest(
+                                    requestID,
+                                    TRANSFER,
+                                    commandSplits[1],
+                                    Integer.parseInt(commandSplits[2]),
+                                    commandSplits[3],
+                                    Float.parseFloat(commandSplits[5]),
+                                    Integer.parseInt(commandSplits[4]),
+                                    null,
+                                    null);
+                            break;
+                        case "exit":
+                            return;
 
-                }
-
-                if (request != null) {
-                    Serializer serializer = new Serializer();
-                    request.write(serializer);
-
-                    DatagramPacket packet = new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
-                            serverAddress, SERVER_PORT);
-
-                    ServiceResponse response = sendRequest(packet);
-                    if (request.getRequestType() == ACCOUNT_MONITOR && response.getResponseCode() == SUCCESS) {
-                        startMonitoring(Integer.parseInt(commandSplits[1]));
                     }
-                } else {
-                    logger.log(Level.SEVERE, "Command parse error.");
+
+                    if (request != null) {
+                        Serializer serializer = new Serializer();
+                        request.write(serializer);
+
+                        DatagramPacket packet = new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
+                                serverAddress, SERVER_PORT);
+
+                        ServiceResponse response = sendRequest(packet);
+                        if (request.getRequestType() == ACCOUNT_MONITOR && response.getResponseCode() == SUCCESS) {
+                            startMonitoring(Integer.parseInt(commandSplits[1]));
+                        }
+                    } else {
+                        logger.log(Level.SEVERE, "Command parse error.");
+                    }
+                    requestID++;
+                } catch (Exception e ){
+                    e.printStackTrace();
+                    continue;
                 }
-                requestID++;
-                System.out.print(">>> ");
+
             }
         } catch (Exception e) {
             e.printStackTrace();
