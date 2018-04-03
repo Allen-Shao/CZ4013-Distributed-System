@@ -42,6 +42,7 @@ public class RequestSender {
     private static Boolean simulation = false;
 
     private int clientPort;
+    private static InetAddress serverAddress;
     private DatagramSocket socket = null;
     private byte[] buffer = new byte[BUFFER_SIZE];
     private Integer requestID = 0;
@@ -49,6 +50,7 @@ public class RequestSender {
     public static void main(String args[]) throws IOException {
         options.addOption("h", "help", false, "Show help.");
         options.addOption("sim", "simulation", false, "Set mode to 'simulation' with error rate.");
+        options.addOption("s", "server", true, "Set server to connect to.");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -58,6 +60,14 @@ public class RequestSender {
 
             if (cmd.hasOption("h"))
                 help();
+
+            if (cmd.hasOption("s")) {
+                logger.log(Level.INFO, "Connecting to server " + cmd.getOptionValue("s"));
+                serverAddress = InetAddress.getByName(cmd.getOptionValue("s"));
+            } else {
+                logger.log(Level.SEVERE, "No server address specified");
+                return;
+            }
 
             if (cmd.hasOption("sim")) {
                 logger.log(Level.INFO, "Using cli argument -sim");
@@ -187,9 +197,8 @@ public class RequestSender {
                     Serializer serializer = new Serializer();
                     request.write(serializer);
 
-                    InetAddress address = InetAddress.getByName("localhost");
                     DatagramPacket packet = new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
-                            address, SERVER_PORT);
+                            serverAddress, SERVER_PORT);
 
                     ServiceResponse response = sendRequest(packet);
                     if (request.getRequestType() == ACCOUNT_MONITER && response.getResponseCode() == SUCCESS) {

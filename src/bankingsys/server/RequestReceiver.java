@@ -88,12 +88,13 @@ public class RequestReceiver {
         handlerMap.put('f', new TransferHandler(accountDatabase, this));
 
         try {
+            InetAddress address = InetAddress.getByName("0.0.0.0");
             if (simulation) {
-                socket = new UnreliableDatagramSocket(SERVER_PORT);
+                socket = new UnreliableDatagramSocket(SERVER_PORT, address);
             } else {
-                socket = new DatagramSocket(SERVER_PORT);
+                socket = new DatagramSocket(SERVER_PORT, address);
             }
-            logger.log(Level.INFO, "Start listening");
+            logger.log(Level.INFO, "Start listening on 0.0.0.0:" + SERVER_PORT);
 
             while (true) {
                 // receive request and parse message

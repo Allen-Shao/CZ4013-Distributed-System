@@ -3,6 +3,7 @@ package bankingsys.net;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Random;
 import java.util.logging.Level;
@@ -23,6 +24,10 @@ public class UnreliableDatagramSocket extends DatagramSocket {
 
     public UnreliableDatagramSocket(int port) throws SocketException {
         super(port);
+    }
+
+    public UnreliableDatagramSocket(int port, InetAddress address) throws SocketException {
+        super(port, address);
     }
 
     @Override
