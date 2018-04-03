@@ -33,7 +33,6 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
  * - Check Name AccountNumber Password
  * - Transfer Name AccountNumber Password TargetAccount Amount
  */
-
 public class RequestSender {
 
     private static final Logger logger = Logger.getLogger(RequestSender.class.getName());
@@ -93,8 +92,8 @@ public class RequestSender {
             clientPort = socket.getLocalPort();
             socket.setSoTimeout(TIMEOUT);
             Scanner sc = new Scanner(System.in);
+            System.out.print(">>> ");
             while (true) {
-                System.out.print(">>> ");
                 String command = sc.nextLine();
                 String[] commandSplits = command.split(" ");
                 String commandType = commandSplits[0];
@@ -191,6 +190,7 @@ public class RequestSender {
                         break;
                     case "exit":
                         return;
+
                 }
 
                 if (request != null) {
@@ -208,6 +208,7 @@ public class RequestSender {
                     logger.log(Level.SEVERE, "Command parse error.");
                 }
                 requestID++;
+                System.out.print(">>> ");
             }
         } catch (Exception e) {
             e.printStackTrace();
