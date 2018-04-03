@@ -39,12 +39,12 @@ public class TransferHandler extends ServiceHandler {
                 } else {
                     response = new ServiceResponse(TRANSFER, FAILURE, null, "No enough balance.", null);
                 }
-
             } else {
                 response = new ServiceResponse(TRANSFER, FAILURE, null, "Target account currency type does not match.", null);
             }
+        } else {
+            response = new ServiceResponse(TRANSFER, FAILURE, null, "Account does not exist.", null);
         }
-        response = new ServiceResponse(TRANSFER, FAILURE, null, "Account does not exist.", null);
         return response;
     }
 }

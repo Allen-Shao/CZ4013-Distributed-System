@@ -32,8 +32,10 @@ public class BalanceUpdateHandler extends ServiceHandler {
                         "Account No." + Integer.toString(account.getAccountNumber()) + " belonging to " + account.getName() +
                                 " has a new balance of $" + Float.toString(account.getBalance()),
                         account.getBalance());
+                return response;
             }
             response = new ServiceResponse(BALANCE_UPDATE, FAILURE, null, "Balance is not enough", null);
+            return response;
         }
         response = new ServiceResponse(BALANCE_UPDATE, FAILURE, null, "Account doesn't exist", null);
         return response;

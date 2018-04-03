@@ -45,8 +45,9 @@ public class AccountMonitoringHandler extends ServiceHandler {
                 }
             }, request.getRequestDelay() * 1000);
             response = new ServiceResponse(ACCOUNT_MONITER, SUCCESS, null, "Monitoring callback registered", null);
+        } else {
+            response = new ServiceResponse(ACCOUNT_MONITER, FAILURE, null, "Monitoring callback already registered", null);
         }
-        response = new ServiceResponse(ACCOUNT_MONITER, FAILURE, null, "Monitoring callback already registered", null);
         return response;
     }
 }

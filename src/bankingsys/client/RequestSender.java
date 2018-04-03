@@ -60,7 +60,7 @@ public class RequestSender {
                 help();
 
             if (cmd.hasOption("sim")) {
-                logger.log(Level.INFO, "Using cli argument -sim=" + cmd.getOptionValue("sim"));
+                logger.log(Level.INFO, "Using cli argument -sim");
                 // Whatever you want to do with the setting goes here
                 simulation = true;
             }
@@ -226,6 +226,7 @@ public class RequestSender {
 
     private void startMonitoring(int duration) {
         try {
+            // create a timer to terminate monitoring after the interval
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -246,13 +247,11 @@ public class RequestSender {
 
                 }
             }, duration * 1000);
+            // start monitoring
             socket.setSoTimeout(0);
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
                 socket.receive(packet);
-
-
                 Deserializer deserializer = new Deserializer(buffer);
                 ServiceResponse response = new ServiceResponse();
                 response.read(deserializer);

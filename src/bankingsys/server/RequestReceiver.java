@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +21,6 @@ import org.apache.commons.cli.*;
 
 import static bankingsys.Constant.BUFFER_SIZE;
 import static bankingsys.Constant.SERVER_PORT;
-import static bankingsys.Constant.TIMEOUT;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
@@ -32,7 +29,6 @@ import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 public class RequestReceiver {
 
     private HashMap <Integer, BankAccount> accountDatabase = new HashMap<>();
-    private int databaseSize = accountDatabase.size();
     private MonitoringClients clients = new MonitoringClients();
     private HashMap<Client, HashMap<Integer, ServiceResponse>> clientsLog = new HashMap<>();
     private DatagramSocket socket = null;
@@ -53,9 +49,7 @@ public class RequestReceiver {
         options.addOption("m", "mode", true, "Set mode to 'at-least-once' or 'at-most-once'.");
         options.addOption("sim", "simulation", false, "Set mode to 'simulation' with error rate.");
         CommandLineParser parser = new DefaultParser();
-
         CommandLine cmd = null;
-
         try {
             cmd = parser.parse(options, args);
 
@@ -63,13 +57,12 @@ public class RequestReceiver {
                 help();
 
             if (cmd.hasOption("sim")) {
-                logger.log(Level.INFO, "Using cli argument -sim=" + cmd.getOptionValue("sim"));
+                logger.log(Level.INFO, "Using cli argument -sim");
                 simulation = true;
             }
 
             if (cmd.hasOption("mode")) {
                 logger.log(Level.INFO, "Using cli argument -mode=" + cmd.getOptionValue("mode"));
-                // Whatever you want to do with the setting goes here
                 if (cmd.getOptionValue("mode").equals("at-most-once"))
                     atMostOnce = true;
             } else {
@@ -94,7 +87,6 @@ public class RequestReceiver {
         handlerMap.put('e', new BalanceUpdateHandler(accountDatabase, this));
         handlerMap.put('f', new TransferHandler(accountDatabase, this));
 
-
         try {
             if (simulation) {
                 socket = new UnreliableDatagramSocket(SERVER_PORT);
@@ -102,18 +94,18 @@ public class RequestReceiver {
                 socket = new DatagramSocket(SERVER_PORT);
             }
             logger.log(Level.INFO, "Start listening");
+
             while (true) {
                 // receive request and parse message
                 DatagramPacket requestPacket =
                         new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(requestPacket);
-                serializer = new Serializer();
-
                 deserializer = new Deserializer(receiveBuffer);
                 ServiceRequest serviceRequest = new ServiceRequest();
                 serviceRequest.read(deserializer);
                 Character op = serviceRequest.getRequestType();
                 ServiceResponse response;
+
                 // Check client in logger. If not exist, register and logger a new client
                 Client tempClient = new Client(requestPacket.getAddress(),requestPacket.getPort());
                 Boolean registered = checkClient(tempClient);
@@ -121,15 +113,18 @@ public class RequestReceiver {
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
                     sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), simulation);
-                    //if (op != 'c')
-                    //    sendCallbacks(response);
                 } else {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
                     serviceRequest.setRequestPort(requestPacket.getPort());
                     // handle the request
                     response = handlerMap.get(op).handleRequest(serviceRequest, simulation);
-                    clientsLog.get(tempClient).put(serviceRequest.getRequestID(), response);
+                    if (atMostOnce) {
+                        clientsLog.get(tempClient).put(serviceRequest.getRequestID(), response);
+                    }
                     sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), simulation);
+                    if (response.getResponseCode() == SUCCESS && op != 'c') {
+                        sendCallbacks(response);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -151,7 +146,7 @@ public class RequestReceiver {
         try {
             socket.send(responsePacket);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "failure on sending reply");
+            logger.log(Level.SEVERE, "Failure on sending reply");
         }
     }
 
@@ -176,17 +171,20 @@ public class RequestReceiver {
         }
     }
 
-    public void sendCallbacks(ServiceResponse response) {
+    private void sendCallbacks(ServiceResponse response) {
         System.out.println("Sending callbacks");
         if (response.getResponseCode() == SUCCESS) {
             for (Client client : clients.getClients()) {
                 DatagramPacket callbackPacket =
                         new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                                 client.getClientAddress(), client.getClientPort());
-                try {
-                    socket.send(callbackPacket);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                while (true) {
+                    try {
+                        socket.send(callbackPacket);
+                        break;
+                    } catch (IOException e) {
+                        continue;
+                    }
                 }
             }
         }

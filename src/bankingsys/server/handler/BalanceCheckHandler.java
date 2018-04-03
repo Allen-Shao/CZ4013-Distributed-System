@@ -30,6 +30,7 @@ public class BalanceCheckHandler extends ServiceHandler {
                         "Account No." + Integer.toString(account.getAccountNumber()) + " belonging to " + account.getName() +
                         " has a balance of $" + Float.toString(account.getBalance()),
                         account.getBalance());
+                return response;
             }
         }
         response = new ServiceResponse(BALANCE_CHECK, FAILURE, null, "Account doesn't exist", null);
