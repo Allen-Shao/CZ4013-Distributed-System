@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static bankingsys.Constant.ACCOUNT_MONITER;
-import static bankingsys.Constant.END_MONITER;
+import static bankingsys.Constant.ACCOUNT_MONITOR;
+import static bankingsys.Constant.END_MONITOR;
 import static bankingsys.message.ServiceResponse.ResponseStatus.FAILURE;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
@@ -44,9 +44,9 @@ public class AccountMonitoringHandler extends ServiceHandler {
                     System.out.println("Client removed");
                 }
             }, request.getRequestDelay() * 1000);
-            response = new ServiceResponse(ACCOUNT_MONITER, SUCCESS, null, "Monitoring callback registered", null);
+            response = new ServiceResponse(ACCOUNT_MONITOR, SUCCESS, null, "Monitoring callback registered", null);
         } else {
-            response = new ServiceResponse(ACCOUNT_MONITER, FAILURE, null, "Monitoring callback already registered", null);
+            response = new ServiceResponse(ACCOUNT_MONITOR, FAILURE, null, "Monitoring callback already registered", null);
         }
         return response;
     }

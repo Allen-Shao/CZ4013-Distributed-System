@@ -11,11 +11,12 @@ public class Constant {
 
     public static final char ACCOUNT_CREATE = 'a';
     public static final char ACCOUNT_CANCEL = 'b';
-    public static final char ACCOUNT_MONITER = 'c';
+    public static final char ACCOUNT_MONITOR = 'c';
     public static final char BALANCE_CHECK = 'd';
     public static final char BALANCE_UPDATE = 'e';
     public static final char TRANSFER = 'f';
-    public static final char END_MONITER = 'g';
+    public static final char END_MONITOR = 'g';
 
 
 }
+

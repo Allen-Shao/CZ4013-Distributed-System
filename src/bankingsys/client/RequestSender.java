@@ -146,7 +146,7 @@ public class RequestSender {
                     case "monitor":
                         request = new ServiceRequest(
                                 requestID,
-                                ACCOUNT_MONITER,
+                                ACCOUNT_MONITOR,
                                 null,
                                 null,
                                 null,
@@ -192,7 +192,7 @@ public class RequestSender {
                             address, SERVER_PORT);
 
                     ServiceResponse response = sendRequest(packet);
-                    if (request.getRequestType() == ACCOUNT_MONITER && response.getResponseCode() == SUCCESS) {
+                    if (request.getRequestType() == ACCOUNT_MONITOR && response.getResponseCode() == SUCCESS) {
                         startMonitoring(Integer.parseInt(commandSplits[1]));
                     }
                 } else {
@@ -233,7 +233,7 @@ public class RequestSender {
                 public void run() {
                     try {
                         DatagramSocket socket = new DatagramSocket();
-                        ServiceResponse response = new ServiceResponse(END_MONITER, SUCCESS,
+                        ServiceResponse response = new ServiceResponse(END_MONITOR, SUCCESS,
                                 null, "Monitoring finished", null);
                         Serializer serializer = new Serializer();
                         response.write(serializer);
@@ -257,7 +257,7 @@ public class RequestSender {
                 response.read(deserializer);
                 logger.log(Level.INFO, "Type: " + response.getResponseType());
                 logger.log(Level.INFO, "Type: " + response.getResponseMessage());
-                if (response.getResponseType() == END_MONITER) {
+                if (response.getResponseType() == END_MONITOR) {
                     socket.setSoTimeout(TIMEOUT);
                     return;
                 }
