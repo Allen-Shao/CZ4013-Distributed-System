@@ -61,8 +61,8 @@ public class ServiceResponse implements Serializable {
         serializer.writeInt(responseCode.ordinal());
         switch (responseType) {
             case ACCOUNT_CREATE:
-            case ACCOUNT_MONITER:
-            case END_MONITER:
+            case ACCOUNT_MONITOR:
+            case END_MONITOR:
                 break;
             case ACCOUNT_CANCEL:
             case BALANCE_CHECK:

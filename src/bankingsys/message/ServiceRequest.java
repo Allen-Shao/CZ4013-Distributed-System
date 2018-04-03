@@ -116,7 +116,7 @@ public class ServiceRequest implements Serializable {
                 serializer.writeFloat(requestAmount);
                 serializer.writeInt(requestCurrency.ordinal());
                 break;
-            case ACCOUNT_MONITER:
+            case ACCOUNT_MONITOR:
                 serializer.writeInt(requestDelay);
                 break;
             case BALANCE_UPDATE:
@@ -153,7 +153,7 @@ public class ServiceRequest implements Serializable {
                 requestAmount = deserializer.readFloat();
                 requestCurrency = Currency.values()[deserializer.readInt()];
                 break;
-            case ACCOUNT_MONITER:
+            case ACCOUNT_MONITOR:
                 requestDelay = deserializer.readInt();
                 break;
             case BALANCE_UPDATE:
