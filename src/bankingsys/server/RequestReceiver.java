@@ -178,13 +178,15 @@ public class RequestReceiver {
                 DatagramPacket callbackPacket =
                         new DatagramPacket(serializer.getBuffer(), serializer.getBufferLength(),
                                 client.getClientAddress(), client.getClientPort());
-                while (true) {
-                    try {
+                try {
+                    if (simulation) {
+                        UnreliableDatagramSocket local = (UnreliableDatagramSocket) socket;
+                        local.sendWithoutFailure(callbackPacket);
+                    } else {
                         socket.send(callbackPacket);
-                        break;
-                    } catch (IOException e) {
-                        continue;
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }

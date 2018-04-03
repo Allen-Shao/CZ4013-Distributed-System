@@ -35,4 +35,8 @@ public class UnreliableDatagramSocket extends DatagramSocket {
             throw new IOException("Simulated failure");
         }
     }
+
+    public void sendWithoutFailure(DatagramPacket packet) throws IOException {
+        super.send(packet);
+    }
 }
