@@ -36,12 +36,4 @@ public class SocketHelper {
             done = true;
         }
     }
-
-    public static void receiveAtMostOnce(DatagramSocket socket, DatagramPacket packetToReceive) {
-
-    }
-
-    public static void receiveAtLeastOnce() {
-
-    }
 }

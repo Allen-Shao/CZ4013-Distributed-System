@@ -9,7 +9,7 @@ import static bankingsys.Constant.*;
 import static bankingsys.message.ServiceResponse.ResponseStatus.SUCCESS;
 
 /**
- * Created by koallen on 29/3/18.
+ * Object that encapsulates the response message
  */
 public class ServiceResponse implements Serializable {
 
@@ -26,6 +26,14 @@ public class ServiceResponse implements Serializable {
 
     public ServiceResponse() {}
 
+    /**
+     * Construct a response message
+     * @param responseType Response type
+     * @param responseCode Response code
+     * @param responseAccount Response account number
+     * @param responseMessage Response message
+     * @param responseAmount Response account balance
+     */
     public ServiceResponse(Character responseType, ResponseStatus responseCode,
                            Integer responseAccount, String responseMessage, Float responseAmount) {
         this.responseType = responseType;

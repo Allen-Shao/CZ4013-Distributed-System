@@ -22,14 +22,15 @@ public class UnreliableDatagramSocket extends DatagramSocket {
         super();
     }
 
-    public UnreliableDatagramSocket(int port) throws SocketException {
-        super(port);
-    }
-
     public UnreliableDatagramSocket(int port, InetAddress address) throws SocketException {
         super(port, address);
     }
 
+    /**
+     * Send a datagram packet with a certain failure probability
+     * @param packet Packet to be sent
+     * @throws IOException Network error
+     */
     @Override
     public void send(DatagramPacket packet) throws IOException {
         float failure = randomGenerator.nextFloat();
@@ -41,6 +42,11 @@ public class UnreliableDatagramSocket extends DatagramSocket {
         }
     }
 
+    /**
+     * Send a datagram packet without simulated error
+     * @param packet Packet to be sent
+     * @throws IOException Network error
+     */
     public void sendWithoutFailure(DatagramPacket packet) throws IOException {
         super.send(packet);
     }

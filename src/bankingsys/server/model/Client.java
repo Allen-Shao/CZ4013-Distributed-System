@@ -3,12 +3,17 @@ package bankingsys.server.model;
 import java.net.InetAddress;
 
 /**
- * Created by koallen on 30/3/18.
+ * Class that represents a client
  */
 public class Client {
     private InetAddress clientAddress;
     private int clientPort;
 
+    /**
+     * Create a client
+     * @param clientAddress Address of client
+     * @param clientPort Port of client
+     */
     public Client(InetAddress clientAddress, int clientPort) {
         this.clientAddress = clientAddress;
         this.clientPort = clientPort;

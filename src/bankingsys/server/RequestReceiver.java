@@ -41,6 +41,10 @@ public class RequestReceiver {
 
     private static Boolean simulation = false;
 
+    /**
+     * Parse input arguments and starts the server
+     * @param args CLI arguments
+     */
     public static void main(String[] args) {
         //Arguments Handle
         Boolean atMostOnce = false;
@@ -78,6 +82,10 @@ public class RequestReceiver {
         new RequestReceiver().run(atMostOnce);
     }
 
+    /**
+     * Main method of the server, accepts user request and reply with a response
+     * @param atMostOnce Whether at-most-once invocation is used
+     */
     private void run(boolean atMostOnce) {
         HashMap<Character, ServiceHandler> handlerMap = new HashMap<>();
         handlerMap.put('a', new AccountCancellationHandler(accountDatabase, this));
@@ -113,7 +121,7 @@ public class RequestReceiver {
 
                 if (atMostOnce && registered && checkRequestHistory(clientsLog.get(tempClient), serviceRequest.getRequestID())) {
                     response = clientsLog.get(tempClient).get(serviceRequest.getRequestID());
-                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), simulation);
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
                 } else {
                     serviceRequest.setRequestAddress(requestPacket.getAddress());
                     serviceRequest.setRequestPort(requestPacket.getPort());
@@ -122,7 +130,7 @@ public class RequestReceiver {
                     if (atMostOnce) {
                         clientsLog.get(tempClient).put(serviceRequest.getRequestID(), response);
                     }
-                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort(), simulation);
+                    sendResponse(response, requestPacket.getAddress(), requestPacket.getPort());
                     if (response.getResponseCode() == SUCCESS && op != 'c') {
                         sendCallbacks(response);
                     }
@@ -137,7 +145,13 @@ public class RequestReceiver {
         }
     }
 
-    private void sendResponse(ServiceResponse response, InetAddress address, int port, boolean simulation) {
+    /**
+     * Helper function to send a response to a client
+     * @param response Response to be sent
+     * @param address Client address
+     * @param port Client port
+     */
+    private void sendResponse(ServiceResponse response, InetAddress address, int port) {
         // send response
         serializer = new Serializer();
         response.write(serializer);
@@ -151,6 +165,12 @@ public class RequestReceiver {
         }
     }
 
+    /**
+     * Check whether a request has been handled before
+     * @param history Server history for a client
+     * @param id Id of request
+     * @return Whether a request has been handled
+     */
     private Boolean checkRequestHistory(HashMap<Integer, ServiceResponse> history, Integer id) {
         if (history.containsKey(id)) {
             System.out.println("Request already handled.");
@@ -161,6 +181,11 @@ public class RequestReceiver {
         }
     }
 
+    /**
+     * Check whether the server received request from a client before
+     * @param client Client to check
+     * @return Whether server received request from this client before
+     */
     private Boolean checkClient(Client client) {
         if (clientsLog.containsKey(client)) {
             System.out.println("Client exists.");
@@ -172,6 +197,10 @@ public class RequestReceiver {
         }
     }
 
+    /**
+     * Helper function to send callback to all registered clients
+     * @param response Callback to be sent
+     */
     private void sendCallbacks(ServiceResponse response) {
         System.out.println("Sending callbacks");
         if (response.getResponseCode() == SUCCESS) {
@@ -193,6 +222,9 @@ public class RequestReceiver {
         }
     }
 
+    /**
+     * Prints help message for providing CLI arguments
+     */
     private static void help() {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("Main", options);

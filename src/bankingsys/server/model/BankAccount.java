@@ -1,7 +1,7 @@
 package bankingsys.server.model;
 
 /**
- * Created by koallen on 29/3/18.
+ * Class that stores bank account information
  */
 public class BankAccount {
     private int accountNumber;
@@ -10,6 +10,14 @@ public class BankAccount {
     private Currency currencyType;
     private float balance;
 
+    /**
+     * Create a new bank account
+     * @param accountNumber Account number
+     * @param name Account name
+     * @param password Account password
+     * @param currencyType Account currency type
+     * @param balance Account initial balance
+     */
     public BankAccount(int accountNumber, String name, String password, Currency currencyType, float balance) {
         this.accountNumber = accountNumber;
         this.name = name;
@@ -18,6 +26,9 @@ public class BankAccount {
         this.balance = balance;
     }
 
+    /**
+     * Enum class for representing currencies
+     */
     public enum Currency {
         SGD, USD, CNY, JPY, HKD
     }

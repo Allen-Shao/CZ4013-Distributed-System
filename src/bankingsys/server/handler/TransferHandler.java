@@ -29,7 +29,7 @@ public class TransferHandler extends ServiceHandler {
                 BankAccount sourceAccount = accounts.get(request.getRequestAccount());
                 BankAccount targetAccount = accounts.get(request.getRequestTargetAccount());
                 if (sourceAccount.getCurrencyType() == targetAccount.getCurrencyType()) {
-                    if (sourceAccount.getBalance() - request.getRequestAccount() >= 0.0f) {
+                    if (sourceAccount.getBalance() - request.getRequestAmount() >= 0.0f) {
                         sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
                         targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAmount());
                         response = new ServiceResponse(TRANSFER, SUCCESS, sourceAccount.getAccountNumber(),

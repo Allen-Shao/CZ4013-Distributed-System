@@ -41,6 +41,18 @@ public class ServiceRequest implements Serializable {
 
     public ServiceRequest() {}
 
+    /**
+     * Construct a request message
+     * @param requestID Request id
+     * @param requestType Request type
+     * @param requestName Request account name
+     * @param requestAccount Request account number
+     * @param requestPassword Request account password
+     * @param requestAmount Request amount
+     * @param requestTargetAccount Request target account number
+     * @param requestCurrency Request currency
+     * @param requestDelay Request monitoring interval
+     */
     public ServiceRequest(Integer requestID, Character requestType, String requestName,
                           Integer requestAccount, String requestPassword, Float requestAmount,
                           Integer requestTargetAccount, Currency requestCurrency, Integer requestDelay) {
