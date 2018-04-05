@@ -65,8 +65,8 @@ public class RequestSender {
                 logger.log(Level.INFO, "Connecting to server " + cmd.getOptionValue("s"));
                 serverAddress = InetAddress.getByName(cmd.getOptionValue("s"));
             } else {
-                logger.log(Level.SEVERE, "No server address specified");
-                return;
+                logger.log(Level.INFO, "No server address specified, using localhost");
+                serverAddress = InetAddress.getByName("localhost");
             }
 
             if (cmd.hasOption("sim")) {
@@ -95,6 +95,7 @@ public class RequestSender {
             Scanner sc = new Scanner(System.in);
             while (true) {
                 System.out.print(">>> ");
+                System.out.flush();
                 String command = sc.nextLine();
                 String[] commandSplits = command.split(" ");
                 String commandType = commandSplits[0];
@@ -225,7 +226,7 @@ public class RequestSender {
             Deserializer deserializer = new Deserializer(buffer);
             ServiceResponse response = new ServiceResponse();
             response.read(deserializer);
-            logger.log(Level.INFO, response.getResponseCode() + response.getResponseMessage());
+            System.out.println(response.getResponseCode() + "\n" + response.getResponseMessage());
             return response;
         } catch (Exception e) {
             e.printStackTrace();

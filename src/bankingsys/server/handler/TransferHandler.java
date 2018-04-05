@@ -23,28 +23,31 @@ public class TransferHandler extends ServiceHandler {
     @Override
     public ServiceResponse handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
-        if (accounts.containsKey(request.getRequestAccount()) &&
-                accounts.containsKey(request.getRequestTargetAccount())) {
-            BankAccount sourceAccount = accounts.get(request.getRequestAccount());
-            BankAccount targetAccount = accounts.get(request.getRequestTargetAccount());
-            if (sourceAccount.getCurrencyType() == targetAccount.getCurrencyType()) {
-                if (sourceAccount.getBalance() >= request.getRequestAccount()) {
-                    sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
-                    targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAmount());
-                    response = new ServiceResponse(TRANSFER, SUCCESS, sourceAccount.getAccountNumber(),
-                            "Transferred $" + Float.toString(request.getRequestAmount()) +
-                                    " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
-                                    " to account no." + Integer.toString(targetAccount.getAccountNumber()),
-                            sourceAccount.getBalance());
+        if (authenticate(request)) {
+            if (accounts.containsKey(request.getRequestAccount()) &&
+                    accounts.containsKey(request.getRequestTargetAccount())) {
+                BankAccount sourceAccount = accounts.get(request.getRequestAccount());
+                BankAccount targetAccount = accounts.get(request.getRequestTargetAccount());
+                if (sourceAccount.getCurrencyType() == targetAccount.getCurrencyType()) {
+                    if (sourceAccount.getBalance() - request.getRequestAccount() >= 0.0f) {
+                        sourceAccount.setBalance(sourceAccount.getBalance() - request.getRequestAmount());
+                        targetAccount.setBalance(targetAccount.getBalance() + request.getRequestAmount());
+                        response = new ServiceResponse(TRANSFER, SUCCESS, sourceAccount.getAccountNumber(),
+                                "Transferred $" + Float.toString(request.getRequestAmount()) +
+                                        " from account no." + Integer.toString(sourceAccount.getAccountNumber()) +
+                                        " to account no." + Integer.toString(targetAccount.getAccountNumber()),
+                                sourceAccount.getBalance());
+                    } else {
+                        response = new ServiceResponse(TRANSFER, FAILURE, null, "No enough balance.", null);
+                    }
+                    return response;
                 } else {
-                    response = new ServiceResponse(TRANSFER, FAILURE, null, "No enough balance.", null);
+                    response = new ServiceResponse(TRANSFER, FAILURE, null, "Target account currency type does not match.", null);
+                    return response;
                 }
-            } else {
-                response = new ServiceResponse(TRANSFER, FAILURE, null, "Target account currency type does not match.", null);
             }
-        } else {
-            response = new ServiceResponse(TRANSFER, FAILURE, null, "Account does not exist.", null);
         }
+        response = new ServiceResponse(TRANSFER, FAILURE, null, "Account does not exist.", null);
         return response;
     }
 }

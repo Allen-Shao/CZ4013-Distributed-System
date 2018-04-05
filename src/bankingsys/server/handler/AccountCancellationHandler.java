@@ -23,12 +23,14 @@ public class AccountCancellationHandler extends ServiceHandler {
     @Override
     public ServiceResponse handleRequest(ServiceRequest request, boolean simulation) {
         ServiceResponse response;
-        if (accounts.containsKey(request.getRequestAccount())) {
-            accounts.remove(request.getRequestAccount());
-            response = new ServiceResponse(ACCOUNT_CREATE, SUCCESS, null, "Account closed", null);
-        } else {
-            response = new ServiceResponse(ACCOUNT_CREATE, FAILURE, null, "Account doesn't exist", null);
+        if (authenticate(request)) {
+            if (accounts.containsKey(request.getRequestAccount())) {
+                accounts.remove(request.getRequestAccount());
+                response = new ServiceResponse(ACCOUNT_CREATE, SUCCESS, null, "Account closed", null);
+                return response;
+            }
         }
+        response = new ServiceResponse(ACCOUNT_CREATE, FAILURE, null, "Account doesn't exist", null);
         return response;
     }
 }
